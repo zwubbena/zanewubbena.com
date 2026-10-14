@@ -1,0 +1,356 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Percent Change Calculator | Zane Wubbena, PhD</title>
+<meta name="description" content="A percent change calculator that shows the formula, fills it in with your values, and shows how to phrase the result, including percentage points versus percent change.">
+<meta name="author" content="Zane Wubbena">
+<link rel="canonical" href="https://zanewubbena.com/tools/percent-change-calculator/">
+<link rel="icon" type="image/png" href="../../favicon.png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Zane Wubbena, PhD">
+<meta property="og:title" content="Percent Change Calculator">
+<meta property="og:description" content="A percent change calculator that shows the formula, fills it in with your values, and shows how to phrase the result, including percentage points versus percent change.">
+<meta property="og:url" content="https://zanewubbena.com/tools/percent-change-calculator/">
+<meta property="og:image" content="https://zanewubbena.com/zane.jpg">
+<meta name="twitter:card" content="summary">
+<style>
+:root {
+  --ink: #000000;
+  --muted: #555555;
+  --field: #808080;
+  --rule: #c0c0c0;
+  --shade: #f2f2f2;
+  --o: #1f4e9a;
+  --n: #00704a;
+  --p: #a14000;
+  --error: #b42318;
+  --ui: Quicksand, Ubuntu, Calibri, Tahoma, sans-serif;
+  color-scheme: light;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: #ffffff; color: var(--ink); font-family: var(--ui); font-size: 14px; line-height: 18px; }
+a { color: #0000ee; } a:visited { color: #551a8b; }
+main { padding: 16px 24px 60px 24px; }
+main > header, main > section { max-width: 50em; }
+hr { margin: 14px 0; }
+h1 { margin: 0; font-size: 28px; line-height: 34px; }
+h2 { margin: 0 0 6px 0; font-size: 18px; }
+h3 { margin: 2px 0 4px; font-size: 15px; }
+.lede { margin: 6px 0 0; font-style: italic; }
+.crumb { margin: 0; }
+.c-o { color: var(--o); } .c-n { color: var(--n); } .c-p { color: var(--p); }
+
+/* Inputs */
+.row + .row { margin-top: 12px; }
+.row label { display: block; margin-bottom: 4px; font-weight: bold; }
+.input-wrap { position: relative; max-width: 20em; }
+.row input[type="text"] { width: 100%; height: 44px; margin: 0; padding: 0 44px 0 8px; border: 1px solid var(--field); border-radius: 0; background: #ffffff; color: var(--ink); font: 16px var(--ui); font-variant-numeric: tabular-nums; }
+.row input::placeholder { color: var(--muted); opacity: 1; font-size: 14px; }
+.row.has-error input[type="text"] { border-color: var(--error); border-width: 2px; }
+.suffix { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); color: var(--muted); font-size: 16px; pointer-events: none; }
+.err { margin: 4px 0 0; color: var(--error); }
+input:focus-visible, button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.check { display: flex; align-items: center; gap: 8px; min-height: 44px; margin-top: 8px; cursor: pointer; }
+.check input { width: 18px; height: 18px; margin: 0; }
+.inputs-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 8px; }
+.hint { flex: 1 1 280px; margin: 0; }
+.btn { flex: none; height: 44px; padding: 0 14px; border: 1px solid var(--field); border-radius: 0; background: var(--shade); color: var(--ink); font: bold 14px/1 var(--ui); cursor: pointer; }
+.btn:hover { border-color: var(--ink); }
+
+/* Formula and steps */
+.eq { margin: 6px 0; padding: 6px 10px; background: var(--shade); border: 1px solid var(--rule); font-size: 16px; line-height: 1.5; overflow-x: auto; white-space: nowrap; }
+.frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; }
+.frac-top, .frac-bot { padding: 0 0.25em; line-height: 1.2; white-space: nowrap; }
+.frac-top { padding-bottom: 0.1em; border-bottom: 1px solid currentColor; }
+.frac-bot { padding-top: 0.1em; }
+.sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.steps { margin: 0; padding: 0; list-style: none; }
+.step { display: grid; grid-template-columns: 22px minmax(0, 1fr); column-gap: 10px; align-items: start; }
+.step + .step { margin-top: 14px; }
+.step > * { grid-column: 2; }
+.step > .num { grid-column: 1; grid-row: 1; }
+.step > h3 { grid-row: 1; }
+.num { width: 22px; height: 22px; display: grid; place-items: center; border: 1px solid currentColor; font-weight: bold; line-height: 1; }
+.step.idle { color: var(--muted); }
+.say { margin: 4px 0; }
+.say.warn { color: var(--error); }
+.note { margin: 14px 0 0; font-size: 13px; }
+
+/* Answer and wording */
+.answer-box { max-width: 34em; padding: 8px 12px; border: 1px solid var(--ink); }
+.answer-box.is-empty { border-color: var(--rule); border-style: dashed; }
+.answer-label { margin: 0; font-weight: bold; }
+.answer-big { margin: 2px 0 0; font-size: 24px; line-height: 30px; overflow-wrap: anywhere; }
+.answer-empty { margin: 0; color: var(--muted); }
+.quote { margin: 6px 0; padding: 6px 10px; border-left: 0; border: 1px solid var(--rule); background: #ffffff; font-size: 15px; line-height: 21px; }
+.mixups { margin: 0; padding-left: 24px; }
+.mixups li { margin-bottom: 8px; }
+.mixups li:last-child { margin-bottom: 0; }
+</style>
+</head>
+<body>
+<main>
+  <p class="crumb"><a href="../../">Zane Wubbena, PhD</a> &gt; Tools</p>
+  <hr>
+  <header>
+    <h1>Percent Change Calculator</h1>
+    <p class="lede">How much did a value grow or shrink, relative to where it started?</p>
+    <p class="say">Comparing two values when neither one is the starting point, such as two districts in the same year? Use the <a href="../percent-difference-calculator/">Percent Difference Calculator</a>.</p>
+  </header>
+  <hr>
+
+  <section aria-labelledby="inputs-h">
+    <h2 id="inputs-h">Inputs</h2>
+    <div class="row" data-var="o">
+      <label for="in-o" class="c-o">Original value</label>
+      <div class="input-wrap">
+        <input id="in-o" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" maxlength="15" placeholder="Enter the starting value" aria-describedby="err-o">
+        <span class="suffix" aria-hidden="true" hidden>%</span>
+      </div>
+      <p class="err" id="err-o" hidden>Enter a number 0 or greater, such as 80 or 2.5.</p>
+    </div>
+    <div class="row" data-var="n">
+      <label for="in-n" class="c-n">New value</label>
+      <div class="input-wrap">
+        <input id="in-n" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" maxlength="15" placeholder="Enter the ending value" aria-describedby="err-n">
+        <span class="suffix" aria-hidden="true" hidden>%</span>
+      </div>
+      <p class="err" id="err-n" hidden>Enter a number 0 or greater, such as 80 or 2.5.</p>
+    </div>
+    <label class="check"><input type="checkbox" id="is-rate"> Both values are percentages (for example, a 20% attendance rate)</label>
+    <div class="inputs-foot">
+      <p class="hint">Enter both values. The steps, the answer, and the wording update as you type.</p>
+      <button class="btn" type="button" id="clear-all">Clear values</button>
+    </div>
+  </section>
+  <hr>
+
+  <section aria-labelledby="steps-h">
+    <h2 id="steps-h">Steps</h2>
+    <ol class="steps" role="list">
+      <li class="step" id="step-1">
+        <span class="num">1</span>
+        <h3>Start with the formula</h3>
+        <div class="body" id="body-1"></div>
+      </li>
+      <li class="step idle" id="step-2">
+        <span class="num">2</span>
+        <h3>Substitute the values</h3>
+        <div class="body" id="body-2"></div>
+      </li>
+      <li class="step idle" id="step-3">
+        <span class="num">3</span>
+        <h3>Find the change</h3>
+        <div class="body" id="body-3"></div>
+      </li>
+      <li class="step idle" id="step-4">
+        <span class="num">4</span>
+        <h3>Divide by the original value</h3>
+        <div class="body" id="body-4"></div>
+      </li>
+      <li class="step idle" id="step-5">
+        <span class="num">5</span>
+        <h3>Multiply by 100</h3>
+        <div class="body" id="body-5"></div>
+      </li>
+    </ol>
+    <p class="note">Numbers are rounded to 6 significant figures for display. The calculation keeps full precision.</p>
+  </section>
+  <hr>
+
+  <section aria-labelledby="answer-h">
+    <h2 id="answer-h">Answer</h2>
+    <div class="answer-box is-empty" id="answer" aria-live="polite">
+      <p class="answer-empty">Enter both values to see the answer.</p>
+    </div>
+  </section>
+  <hr>
+
+  <section aria-labelledby="say-h">
+    <h2 id="say-h">How to say it</h2>
+    <div id="say"><p class="answer-empty">Enter both values to see how to phrase the result.</p></div>
+  </section>
+  <hr>
+
+  <section aria-labelledby="mix-h">
+    <h2 id="mix-h">Common mix-ups</h2>
+    <div id="mix"><p class="answer-empty">Enter both values to see the common mix-ups for your numbers.</p></div>
+  </section>
+  <hr>
+  <p style="margin: 0"><a href="../../">Back to home</a></p>
+</main>
+
+<script>
+"use strict";
+(() => {
+  const SUP = { "-": "⁻", "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" };
+  // Round to 6 significant figures for display; whole-number digits are never dropped.
+  function fmt(x) {
+    if (x === 0) return "0";
+    const ax = Math.abs(x);
+    if (ax >= 1e15 || ax < 1e-6) {
+      const [mant, exp] = x.toExponential(5).split("e");
+      return mant.replace(/0+$/, "").replace(/\.$/, "") + " × 10" + String(Number(exp)).replace(/[-0-9]/g, c => SUP[c]);
+    }
+    const dec = Math.min(Math.max(5 - Math.floor(Math.log10(ax)), 0), 15);
+    return x.toLocaleString("en-US", { maximumFractionDigits: dec }).replace("-", "−");
+  }
+  function parse(raw) {
+    let s = String(raw).trim().replace(/%$/, "").trim();
+    if (s === "") return { state: "empty" };
+    if (s === ".") return { state: "partial" };
+    if (/^\d{1,3}(,\d{3})+(\.\d*)?$/.test(s)) s = s.replace(/,/g, "");
+    if (!/^(\d+\.?\d*|\.\d+)$/.test(s)) return { state: "invalid" };
+    return { state: "ok", value: parseFloat(s) };
+  }
+
+  const el = id => document.getElementById(id);
+  const rows = {};
+  for (const v of ["o", "n"]) {
+    const row = document.querySelector('.row[data-var="' + v + '"]');
+    rows[v] = { row, input: row.querySelector("input"), err: row.querySelector(".err"), suffix: row.querySelector(".suffix") };
+  }
+  const isRate = el("is-rate");
+  const steps = [1, 2, 3, 4, 5].map(n => ({ li: el("step-" + n), body: el("body-" + n) }));
+  const answer = el("answer");
+  const say = el("say");
+  const mix = el("mix");
+
+  const span = (cls, text) => '<span class="' + cls + '">' + text + "</span>";
+  const frac = (top, bot) => '<span class="frac"><span class="frac-top">' + top +
+    '</span><span class="sr"> divided by </span><span class="frac-bot">' + bot + "</span></span>";
+  const eq = html => '<p class="eq">' + html + "</p>";
+  const p = (html, cls) => '<p class="' + (cls || "say") + '">' + html + "</p>";
+
+  const FORMULA = "Percent change = " +
+    frac(span("c-n", "New") + " − " + span("c-o", "Original"), span("c-o", "Original")) + " × 100";
+
+  function render() {
+    const rate = isRate.checked;
+    const unit = rate ? "%" : "";
+    const known = {};
+    let invalid = false;
+    let partial = false;
+    for (const v of ["o", "n"]) {
+      const r = rows[v];
+      const q = parse(r.input.value);
+      const bad = q.state === "invalid";
+      r.err.hidden = !bad;
+      r.row.classList.toggle("has-error", bad);
+      r.input.setAttribute("aria-invalid", bad ? "true" : "false");
+      r.suffix.hidden = !rate;
+      if (bad) invalid = true;
+      if (q.state === "partial") partial = true;
+      if (q.state === "ok") known[v] = q.value;
+    }
+
+    steps[0].body.innerHTML = eq(FORMULA) +
+      p("This one formula covers increases and decreases. Some books write a decrease as " +
+        frac(span("c-o", "Original") + " − " + span("c-n", "New"), span("c-o", "Original")) +
+        " × 100 so the answer comes out positive. It is the same formula with the subtraction flipped, and the word “decrease” carries the direction instead of the minus sign.");
+    const ready = !invalid && !partial && "o" in known && "n" in known;
+    if (!ready) {
+      steps[0].body.innerHTML += p(invalid ? "Fix the entry above to continue." :
+        Object.keys(known).length === 1 ? "Enter one more value to fill in the formula." : "Enter both values to fill in the formula.");
+      for (const s of steps.slice(1)) { s.li.classList.add("idle"); s.body.innerHTML = ""; }
+      answer.classList.add("is-empty");
+      answer.innerHTML = '<p class="answer-empty">Enter both values to see the answer.</p>';
+      say.innerHTML = '<p class="answer-empty">Enter both values to see how to phrase the result.</p>';
+      mix.innerHTML = '<p class="answer-empty">Enter both values to see the common mix-ups for your numbers.</p>';
+      return;
+    }
+
+    const o = known.o;
+    const n = known.n;
+    const O = span("c-o", fmt(o) + unit);
+    const N = span("c-n", fmt(n) + unit);
+    const diff = n - o;
+    const D = rate ? fmt(diff) + " percentage " + (Math.abs(diff) === 1 ? "point" : "points") : fmt(diff);
+    const thing = rate ? "rate" : "value";
+    for (const s of steps.slice(1)) s.li.classList.remove("idle");
+    steps[0].body.innerHTML += p("The original value is the base, so it goes on the bottom.");
+    steps[1].body.innerHTML = eq("Percent change = " + frac(N + " − " + O, O) + " × 100");
+    steps[2].body.innerHTML = eq(N + " − " + O + " = " + D) +
+      p((diff > 0 ? "The " + thing + " went up, so the change is positive." : diff < 0 ? "The " + thing + " went down, so the change is negative." : "The " + thing + " did not change.") +
+        (rate && diff !== 0 ? " The difference between two percentages is measured in percentage points, not percent." : ""));
+
+    if (o === 0) {
+      steps[3].body.innerHTML = p("The original value is 0, and division by 0 has no answer. Percent change needs a starting value greater than 0.", "say warn");
+      steps[4].li.classList.add("idle");
+      steps[4].body.innerHTML = "";
+      answer.classList.add("is-empty");
+      answer.innerHTML = '<p class="answer-empty">Enter an original value greater than 0 to see the answer.</p>';
+      say.innerHTML = p("A change from 0 has no percent change. Describe it as the change itself: the value went from " + O + " to " + N + ".");
+      mix.innerHTML = '<p class="answer-empty">Enter an original value greater than 0.</p>';
+      return;
+    }
+
+    const ratio = diff / o;
+    const pct = ratio * 100;
+    const P = fmt(Math.abs(pct)) + "%";
+    steps[3].body.innerHTML = eq(frac(rate ? fmt(diff) : D, rate ? span("c-o", fmt(o)) : O) + " = " + fmt(ratio).replace("-", "−")) +
+      (rate ? p("Points divided by the original rate gives a ratio with no unit, so the % signs drop out here.") : "");
+    steps[4].body.innerHTML = eq(fmt(ratio).replace("-", "−") + " × 100 = " + span("c-p", fmt(pct).replace("-", "−") + "%"));
+
+    const dir = diff > 0 ? "increase" : diff < 0 ? "decrease" : "no change";
+    answer.classList.remove("is-empty");
+    answer.innerHTML = '<p class="answer-label">Percent change</p>' +
+      '<p class="answer-big">' + span("c-p", (pct > 0 ? "+" : "") + fmt(pct).replace("-", "−") + "%") + " (" + dir + ")</p>";
+
+    const verb = diff > 0 ? "increased" : "decreased";
+    let s = "";
+    if (diff === 0) {
+      s = '<p class="quote">The ' + thing + " did not change. It stayed at " + O + ".</p>";
+    } else if (rate) {
+      const pts = fmt(Math.abs(diff));
+      s = p("For two percentages, report the change both ways, and name the unit each time:") +
+        '<p class="quote">The rate ' + verb + " by " + pts + (Math.abs(diff) === 1 ? " percentage point" : " percentage points") +
+        ", from " + O + " to " + N + ".</p>" +
+        '<p class="quote">That is a ' + span("c-p", P) + " " + dir + " in the rate.</p>" +
+        p("Use “percentage points” for the subtraction (" + N + " − " + O + ") and “percent” for the relative change (step 5).");
+    } else {
+      s = '<p class="quote">The value ' + verb + " by " + span("c-p", P) + ", from " + O + " to " + N + ".</p>" +
+        p("Name both the starting value and the ending value, so the reader knows what the percent is relative to.");
+    }
+    say.innerHTML = s;
+
+    if (diff === 0) {
+      mix.innerHTML = p("With no change, there is nothing to mix up: the percent change is 0%" + (rate ? " and the difference is 0 percentage points." : "."));
+      return;
+    }
+    const items = [];
+    if (rate) {
+      const wrong = o * (1 + diff / 100);
+      items.push("<strong>Percentage points versus percent.</strong> The rates differ by " + fmt(Math.abs(diff)) +
+        " percentage points. Saying the rate “" + verb + " by " + fmt(Math.abs(diff)) + "%” would mean " +
+        O + " × (1 " + (diff > 0 ? "+" : "−") + " " + fmt(Math.abs(diff)) + "/100) = " + fmt(wrong) + "%, not " + N + ".");
+    }
+    const of = n / o * 100;
+    items.push("<strong>“" + (diff > 0 ? "Increased by" : "Decreased by") + "” versus “of.”</strong> " + N + " is " + fmt(of) + "% of " + O +
+      ", which is " + P + (diff > 0 ? " more" : " less") + " than " + O + "." +
+      (diff > 0 ? " Saying it “increased by " + fmt(of) + "%” would mean " + fmt(o * (1 + of / 100)) + unit + "." : ""));
+    if (n > 0) {
+      const back = (o - n) / n * 100;
+      items.push("<strong>Going back is not the same percent.</strong> Returning from " + N + " to " + O + " is a " +
+        fmt(Math.abs(back)) + "% " + (back > 0 ? "increase" : "decrease") + ", not " + P + ", because the base is now " + N + ".");
+    }
+    mix.innerHTML = '<ul class="mixups">' + items.map(i => "<li>" + i + "</li>").join("") + "</ul>";
+  }
+
+  for (const v of ["o", "n"]) rows[v].input.addEventListener("input", render);
+  isRate.addEventListener("change", render);
+  el("clear-all").addEventListener("click", () => {
+    for (const v of ["o", "n"]) rows[v].input.value = "";
+    render();
+    rows.o.input.focus();
+  });
+  for (const v of ["o", "n"]) rows[v].input.value = "";
+  render();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,295 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tip Calculator | Zane Wubbena, PhD</title>
+<meta name="description" content="A tip calculator with quick 20%, 15%, and 10% options that shows the formula with your bill filled in, the total, the split, and how to work the tip out in your head.">
+<meta name="author" content="Zane Wubbena">
+<link rel="canonical" href="https://zanewubbena.com/tools/tip-calculator/">
+<link rel="icon" type="image/png" href="../../favicon.png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Zane Wubbena, PhD">
+<meta property="og:title" content="Tip Calculator">
+<meta property="og:description" content="A tip calculator with quick 20%, 15%, and 10% options that shows the formula with your bill filled in, the total, the split, and how to work the tip out in your head.">
+<meta property="og:url" content="https://zanewubbena.com/tools/tip-calculator/">
+<meta property="og:image" content="https://zanewubbena.com/zane.jpg">
+<meta name="twitter:card" content="summary">
+<style>
+:root {
+  --ink: #000000;
+  --muted: #555555;
+  --field: #808080;
+  --rule: #c0c0c0;
+  --shade: #f2f2f2;
+  --b: #1f4e9a;
+  --t: #00704a;
+  --p: #a14000;
+  --error: #b42318;
+  --ui: Quicksand, Ubuntu, Calibri, Tahoma, sans-serif;
+  color-scheme: light;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: #ffffff; color: var(--ink); font-family: var(--ui); font-size: 14px; line-height: 18px; }
+a { color: #0000ee; } a:visited { color: #551a8b; }
+main { padding: 16px 24px 60px 24px; }
+main > header, main > section { max-width: 50em; }
+hr { margin: 14px 0; }
+h1 { margin: 0; font-size: 28px; line-height: 34px; }
+h2 { margin: 0 0 6px 0; font-size: 18px; }
+h3 { margin: 2px 0 4px; font-size: 15px; }
+.lede { margin: 6px 0 0; font-style: italic; }
+.crumb { margin: 0; }
+.c-b { color: var(--b); } .c-t { color: var(--t); } .c-p { color: var(--p); }
+
+/* Inputs */
+.row + .row { margin-top: 12px; }
+.row label { display: block; margin-bottom: 4px; font-weight: bold; }
+.input-wrap { position: relative; max-width: 20em; }
+.row input[type="text"] { width: 100%; height: 44px; margin: 0; padding: 0 44px 0 8px; border: 1px solid var(--field); border-radius: 0; background: #ffffff; color: var(--ink); font: 16px var(--ui); font-variant-numeric: tabular-nums; }
+.row input::placeholder { color: var(--muted); opacity: 1; font-size: 14px; }
+.row.has-error input[type="text"] { border-color: var(--error); border-width: 2px; }
+.suffix { position: absolute; top: 50%; right: 12px; transform: translateY(-50%); color: var(--muted); font-size: 16px; pointer-events: none; }
+.err { margin: 4px 0 0; color: var(--error); }
+input:focus-visible, button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+.check { display: flex; align-items: center; gap: 8px; min-height: 44px; margin-top: 8px; cursor: pointer; }
+.check input { width: 18px; height: 18px; margin: 0; }
+.inputs-foot { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; margin-top: 8px; }
+.hint { flex: 1 1 280px; margin: 0; }
+.btn { flex: none; height: 44px; padding: 0 14px; border: 1px solid var(--field); border-radius: 0; background: var(--shade); color: var(--ink); font: bold 14px/1 var(--ui); cursor: pointer; }
+.btn:hover { border-color: var(--ink); }
+
+/* Formula and steps */
+.eq { margin: 6px 0; padding: 6px 10px; background: var(--shade); border: 1px solid var(--rule); font-size: 16px; line-height: 1.5; overflow-x: auto; white-space: nowrap; }
+.frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; }
+.frac-top, .frac-bot { padding: 0 0.25em; line-height: 1.2; white-space: nowrap; }
+.frac-top { padding-bottom: 0.1em; border-bottom: 1px solid currentColor; }
+.frac-bot { padding-top: 0.1em; }
+.sr { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0; }
+.steps { margin: 0; padding: 0; list-style: none; }
+.step { display: grid; grid-template-columns: 22px minmax(0, 1fr); column-gap: 10px; align-items: start; }
+.step + .step { margin-top: 14px; }
+.step > * { grid-column: 2; }
+.step > .num { grid-column: 1; grid-row: 1; }
+.step > h3 { grid-row: 1; }
+.num { width: 22px; height: 22px; display: grid; place-items: center; border: 1px solid currentColor; font-weight: bold; line-height: 1; }
+.step.idle { color: var(--muted); }
+.say { margin: 4px 0; }
+.say.warn { color: var(--error); }
+.note { margin: 14px 0 0; font-size: 13px; }
+
+/* Answer and wording */
+.answer-box { max-width: 34em; padding: 8px 12px; border: 1px solid var(--ink); }
+.answer-box.is-empty { border-color: var(--rule); border-style: dashed; }
+.answer-label { margin: 0; font-weight: bold; }
+.answer-big { margin: 2px 0 0; font-size: 24px; line-height: 30px; overflow-wrap: anywhere; }
+.answer-empty { margin: 0; color: var(--muted); }
+.quote { margin: 6px 0; padding: 6px 10px; border-left: 0; border: 1px solid var(--rule); background: #ffffff; font-size: 15px; line-height: 21px; }
+.mixups { margin: 0; padding-left: 24px; }
+.mixups li { margin-bottom: 8px; }
+.mixups li:last-child { margin-bottom: 0; }
+.prefix { position: absolute; top: 50%; left: 10px; transform: translateY(-50%); color: var(--muted); font-size: 16px; pointer-events: none; }
+.has-prefix input[type="text"] { padding-left: 24px; }
+.quick { display: flex; flex-wrap: wrap; gap: 8px; max-width: 34em; }
+.pick { min-width: 64px; height: 44px; padding: 0 14px; border: 1px solid var(--field); border-radius: 0; background: #ffffff; color: var(--ink); font: bold 15px/1 var(--ui); cursor: pointer; }
+.pick:hover { border-color: var(--ink); }
+.pick[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #ffffff; }
+.custom { width: 9em; }
+.custom input[type="text"] { padding-right: 28px; }
+.sub { margin: 6px 0 4px; font-weight: bold; }
+</style>
+</head>
+<body>
+<main>
+  <p class="crumb"><a href="../../">Zane Wubbena, PhD</a> &gt; Tools</p>
+  <hr>
+  <header>
+    <h1>Tip Calculator</h1>
+    <p class="lede">How much to tip, what the total is, and how to work it out in your head.</p>
+  </header>
+  <hr>
+
+  <section aria-labelledby="inputs-h">
+    <h2 id="inputs-h">Inputs</h2>
+    <div class="row" id="row-bill">
+      <label for="in-bill" class="c-b">Bill amount</label>
+      <div class="input-wrap has-prefix">
+        <span class="prefix" aria-hidden="true">$</span>
+        <input id="in-bill" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" maxlength="15" placeholder="Enter the bill" aria-describedby="err-bill">
+      </div>
+      <p class="err" id="err-bill" hidden>Enter an amount such as 48 or 48.50.</p>
+    </div>
+    <div class="row" id="row-pct">
+      <p class="sub" id="pct-label">Tip percent</p>
+      <div class="quick" role="group" aria-labelledby="pct-label">
+        <button class="pick" type="button" data-pct="20" aria-pressed="true">20%</button>
+        <button class="pick" type="button" data-pct="15" aria-pressed="false">15%</button>
+        <button class="pick" type="button" data-pct="10" aria-pressed="false">10%</button>
+        <div class="input-wrap custom">
+          <input id="in-pct" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" maxlength="6" placeholder="Other" aria-label="Other tip percent" aria-describedby="err-pct">
+          <span class="suffix" aria-hidden="true">%</span>
+        </div>
+      </div>
+      <p class="err" id="err-pct" hidden>Enter a percent such as 18 or 22.5.</p>
+    </div>
+    <div class="row" id="row-people">
+      <label for="in-people">Split between (people)</label>
+      <div class="input-wrap" style="max-width: 9em">
+        <input id="in-people" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" maxlength="3" value="1" aria-describedby="err-people">
+      </div>
+      <p class="err" id="err-people" hidden>Enter a whole number of people, 1 or more.</p>
+    </div>
+    <div class="inputs-foot">
+      <p class="hint">Enter the bill and pick a tip. Type in the Other box for any other percent.</p>
+      <button class="btn" type="button" id="clear-all">Clear values</button>
+    </div>
+  </section>
+  <hr>
+
+  <section aria-labelledby="steps-h">
+    <h2 id="steps-h">Steps</h2>
+    <ol class="steps" role="list">
+      <li class="step" id="step-1"><span class="num">1</span><h3>Start with the formula</h3><div class="body" id="body-1"></div></li>
+      <li class="step idle" id="step-2"><span class="num">2</span><h3>Substitute the values</h3><div class="body" id="body-2"></div></li>
+      <li class="step idle" id="step-3"><span class="num">3</span><h3>Find the tip</h3><div class="body" id="body-3"></div></li>
+      <li class="step idle" id="step-4"><span class="num">4</span><h3>Add the tip to the bill</h3><div class="body" id="body-4"></div></li>
+      <li class="step idle" id="step-5"><span class="num">5</span><h3>Split the total</h3><div class="body" id="body-5"></div></li>
+    </ol>
+    <p class="note">Dollar amounts are rounded to the nearest cent.</p>
+  </section>
+  <hr>
+
+  <section aria-labelledby="answer-h">
+    <h2 id="answer-h">Answer</h2>
+    <div class="answer-box is-empty" id="answer" aria-live="polite">
+      <p class="answer-empty">Enter the bill to see the answer.</p>
+    </div>
+  </section>
+  <hr>
+
+  <section aria-labelledby="head-h">
+    <h2 id="head-h">Work it out in your head</h2>
+    <div id="head"></div>
+  </section>
+  <hr>
+  <p style="margin: 0"><a href="../../">Back to home</a></p>
+</main>
+
+<script>
+"use strict";
+(() => {
+  const money = x => "$" + x.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const cents = x => Math.round(x * 100) / 100;
+  const num = x => x.toLocaleString("en-US", { maximumFractionDigits: 4 });
+  function parse(raw, whole) {
+    let s = String(raw).trim().replace(/^\$/, "").replace(/%$/, "").trim();
+    if (s === "") return { state: "empty" };
+    if (s === ".") return { state: "partial" };
+    if (/^\d{1,3}(,\d{3})+(\.\d*)?$/.test(s)) s = s.replace(/,/g, "");
+    const re = whole ? /^\d+$/ : /^(\d+\.?\d*|\.\d+)$/;
+    if (!re.test(s)) return { state: "invalid" };
+    return { state: "ok", value: parseFloat(s) };
+  }
+
+  const el = id => document.getElementById(id);
+  const bill = el("in-bill");
+  const pctIn = el("in-pct");
+  const people = el("in-people");
+  const picks = [...document.querySelectorAll(".pick")];
+  const steps = [1, 2, 3, 4, 5].map(n => ({ li: el("step-" + n), body: el("body-" + n) }));
+  const answer = el("answer");
+  const head = el("head");
+  let quick = 20;
+
+  const span = (cls, text) => '<span class="' + cls + '">' + text + "</span>";
+  const frac = (top, bot) => '<span class="frac"><span class="frac-top">' + top +
+    '</span><span class="sr"> divided by </span><span class="frac-bot">' + bot + "</span></span>";
+  const eq = html => '<p class="eq">' + html + "</p>";
+  const p = (html, cls) => '<p class="' + (cls || "say") + '">' + html + "</p>";
+  function flag(input, errId, rowId, bad) {
+    el(errId).hidden = !bad;
+    el(rowId).classList.toggle("has-error", bad);
+    input.setAttribute("aria-invalid", bad ? "true" : "false");
+  }
+
+  function render() {
+    const b = parse(bill.value, false);
+    const c = parse(pctIn.value, false);
+    const n = parse(people.value, true);
+    flag(bill, "err-bill", "row-bill", b.state === "invalid");
+    flag(pctIn, "err-pct", "row-pct", c.state === "invalid");
+    const badPeople = n.state === "invalid" || (n.state === "ok" && n.value < 1);
+    flag(people, "err-people", "row-people", badPeople);
+    for (const btn of picks) btn.setAttribute("aria-pressed", c.state === "empty" && Number(btn.dataset.pct) === quick ? "true" : "false");
+
+    const pct = c.state === "ok" ? c.value : c.state === "empty" ? quick : null;
+    const split = n.state === "ok" && n.value >= 1 ? n.value : n.state === "empty" ? 1 : null;
+    steps[0].body.innerHTML = eq(span("c-t", "Tip") + " = " + span("c-b", "Bill") + " × " + frac("Tip percent", "100")) +
+      p("Dividing the percent by 100 turns it into a decimal: 20% becomes 0.20.");
+    const ready = b.state === "ok" && pct !== null && split !== null && c.state !== "partial";
+    if (!ready) {
+      steps[0].body.innerHTML += p(b.state === "invalid" || c.state === "invalid" || badPeople ? "Fix the entry above to continue." : "Enter the bill to fill in the formula.");
+      for (const s of steps.slice(1)) { s.li.classList.add("idle"); s.body.innerHTML = ""; }
+      answer.classList.add("is-empty");
+      answer.innerHTML = '<p class="answer-empty">Enter the bill to see the answer.</p>';
+      head.innerHTML = '<p class="answer-empty">Enter the bill to see the shortcut for your numbers.</p>';
+      return;
+    }
+
+    const B = span("c-b", money(b.value));
+    const tip = cents(b.value * pct / 100);
+    const total = cents(b.value + tip);
+    for (const s of steps.slice(1, 4)) s.li.classList.remove("idle");
+    steps[1].body.innerHTML = eq(span("c-t", "Tip") + " = " + B + " × " + frac(num(pct), "100"));
+    steps[2].body.innerHTML = eq(B + " × " + num(pct / 100) + " = " + span("c-t", money(tip)));
+    steps[3].body.innerHTML = eq(B + " + " + span("c-t", money(tip)) + " = " + span("c-p", money(total)));
+
+    let per = null;
+    if (split > 1) {
+      per = cents(total / split);
+      steps[4].li.classList.remove("idle");
+      const gap = cents(total - per * split);
+      steps[4].body.innerHTML = eq(frac(span("c-p", money(total)), num(split) + " people") + " = " + money(per) + " each") +
+        (gap !== 0 ? p("Rounded to the cent, " + num(split) + " shares of " + money(per) + " come to " + money(cents(per * split)) +
+          ", which is " + money(Math.abs(gap)) + (gap > 0 ? " short of" : " over") + " the total. One person covers the difference.") : "");
+    } else {
+      steps[4].li.classList.add("idle");
+      steps[4].body.innerHTML = p("One person pays the whole total. Enter more than 1 person to split it.");
+    }
+
+    answer.classList.remove("is-empty");
+    answer.innerHTML = '<p class="answer-label">Tip at ' + num(pct) + '%</p><p class="answer-big">' + span("c-t", money(tip)) + "</p>" +
+      '<p class="answer-label" style="margin-top: 8px">Total</p><p class="answer-big">' + span("c-p", money(total)) + "</p>" +
+      (per !== null ? '<p class="answer-label" style="margin-top: 8px">Each of ' + num(split) + ' people</p><p class="answer-big">' + money(per) + "</p>" : "");
+
+    // Exact amounts for the shortcuts, so each line adds up as written.
+    const exact = x => "$" + (Math.round(x * 10000) / 10000).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 4 });
+    const result = x => exact(x) + (cents(x) !== Math.round(x * 10000) / 10000 ? ", or " + money(cents(x)) + " rounded to the cent" : "");
+    const ten = b.value / 10;
+    const T = exact(ten);
+    const items = ["<strong>10%:</strong> move the decimal point one place left. " + B + " becomes " + T + "."];
+    items.push("<strong>20%:</strong> double the 10%. " + T + " × 2 = " + result(ten * 2) + ".");
+    items.push("<strong>15%:</strong> take the 10%, then add half of it. " + T + " + " + exact(ten / 2) + " = " + result(ten * 1.5) + ".");
+    head.innerHTML = '<ul class="mixups">' + items.map(i => "<li>" + i + "</li>").join("") + "</ul>" +
+      p("Every shortcut starts from the 10%, so find that first.");
+  }
+
+  for (const btn of picks) btn.addEventListener("click", () => {
+    quick = Number(btn.dataset.pct);
+    pctIn.value = "";
+    render();
+  });
+  for (const i of [bill, pctIn, people]) i.addEventListener("input", render);
+  el("clear-all").addEventListener("click", () => {
+    bill.value = ""; pctIn.value = ""; people.value = "1"; quick = 20;
+    render();
+    bill.focus();
+  });
+  bill.value = ""; pctIn.value = ""; people.value = "1";
+  render();
+})();
+</script>
+</body>
+</html>

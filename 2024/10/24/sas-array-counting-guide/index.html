@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SAS Array Counting Guide | Zane Wubbena, PhD</title>
+<meta name="description" content="How to use arrays and loops in SAS to count conditional values.">
+<meta name="author" content="Zane Wubbena">
+<link rel="canonical" href="https://zanewubbena.com/2024/10/24/sas-array-counting-guide/">
+<link rel="icon" type="image/png" href="../../../../favicon.png">
+<link rel="apple-touch-icon" href="../../../../apple-touch-icon.png">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="Zane Wubbena, PhD">
+<meta property="og:title" content="SAS Array Counting Guide">
+<meta property="og:description" content="How to use arrays and loops in SAS to count conditional values.">
+<meta property="og:url" content="https://zanewubbena.com/2024/10/24/sas-array-counting-guide/">
+<meta property="og:image" content="https://zanewubbena.com/zane.jpg">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "Article",
+ "headline": "SAS Array Counting Guide",
+ "description": "How to use arrays and loops in SAS to count conditional values.",
+ "datePublished": "2024-10-24",
+ "url": "https://zanewubbena.com/2024/10/24/sas-array-counting-guide/",
+ "mainEntityOfPage": "https://zanewubbena.com/2024/10/24/sas-array-counting-guide/",
+ "author": {
+  "@type": "Person",
+  "name": "Zane Wubbena",
+  "url": "https://zanewubbena.com/"
+ }
+}
+</script>
+<style>
+body{margin:0;font-family:Quicksand,Ubuntu,Calibri,Tahoma,sans-serif;background:#ffffff;color:#000000}
+a{color:#0000ee}a:visited{color:#551a8b}
+.page{box-sizing:border-box;padding:16px 24px 60px 24px;font-size:14px;line-height:18px}
+.col{max-width:50em}
+pre{white-space:pre-wrap}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="col">
+<p style="margin: 0"><a href="../../../../">Zane Wubbena, PhD</a> &gt; Writing</p>
+<hr style="margin: 14px 0">
+<h1 style="margin: 0; font-size: 28px; line-height: 34px">SAS Array Counting Guide</h1>
+<p style="margin: 6px 0 0 0; font-style: italic">How to use arrays and loops in SAS to count conditional values</p>
+<p style="margin: 6px 0 0 0; font-size: 13px">October 24, 2024. Filed under SAS Programming.</p>
+<h2 style="margin: 28px 0 8px 0; font-size: 18px">Overview</h2>
+<h3 style="margin: 12px 0 6px 0; font-size: 15px">Introduction</h3>
+<p style="margin: 0">Schools are assigned annual special education determination levels (DL):</p>
+<ul style="margin: 6px 0 0 0; padding-left: 28px">
+<li>DL 1: Meets Requirements</li>
+<li>DL 2: Needs Assistance</li>
+<li>DL 3: Needs Intervention</li>
+<li>DL 4: Needs Substantial Intervention</li>
+</ul>
+<h3 style="margin: 16px 0 6px 0; font-size: 15px">Data Analysis Problem</h3>
+<p style="margin: 0">We need to count variables in a SAS dataset that have a specific determination level value (in this case, 4). This counting helps with:</p>
+<ul style="margin: 6px 0 0 0; padding-left: 28px">
+<li>Data summarization</li>
+<li>Tracking condition occurrences</li>
+<li>Reporting and analysis according to <a href="https://sites.ed.gov/idea/files/Guidance_on_State_General_Supervision_Responsibilities_under_Parts_B_and_C_of_IDEA-07-24-2023.pdf">OSEP QA 23-01</a></li>
+</ul>
+<h3 style="margin: 16px 0 6px 0; font-size: 15px">Solution Approach</h3>
+<p style="margin: 0">The solution uses two key SAS programming elements: an <b>array</b> to group related variables, and a <b>do loop</b> to automatically check each variable. Instead of manual checking, this approach examines each variable in the array, counts occurrences of the value 4, and stores the final count in a new variable (TOTAL_NSI_CNT).</p>
+<h2 style="margin: 28px 0 8px 0; font-size: 18px">Understanding the Array and Its Components</h2>
+<h3 style="margin: 12px 0 6px 0; font-size: 15px">1. Initializing a Variable</h3>
+<p style="margin: 0">Before starting the loop, we initialize a variable that will hold the count of how many variables meet the condition. Initialization means setting a starting value. TOTAL_NSI_CNT starts at 0 because nothing has been counted yet, and this ensures the counter starts fresh for each row of data.</p>
+<pre style="margin: 10px 0 0 0; padding: 10px 12px; background: #f2f2f2; border: 1px solid #c0c0c0; font-family: 'Courier New', Courier, monospace; font-size: 13px; overflow-x: auto">TOTAL_NSI_CNT = 0;</pre>
+<h3 style="margin: 16px 0 6px 0; font-size: 15px">2. Defining an Array</h3>
+<p style="margin: 0">Arrays group multiple variables together so they can be treated as a single entity. The same logic then applies to every variable without repetitive code. Here, the array dv_vars contains seven variables (DL_18 through DL_24).</p>
+<pre style="margin: 10px 0 0 0; padding: 10px 12px; background: #f2f2f2; border: 1px solid #c0c0c0; font-family: 'Courier New', Courier, monospace; font-size: 13px; overflow-x: auto">array dv_vars[7] DL_18 DL_19 DL_20 DL_21 DL_22 DL_23 DL_24;</pre>
+<h3 style="margin: 16px 0 6px 0; font-size: 15px">3. Using a Do Loop to Process Each Element</h3>
+<p style="margin: 0">A do loop repeats a set of instructions until a condition is met. Here it goes through each variable in the array and checks whether it equals 4.</p>
+<pre style="margin: 10px 0 0 0; padding: 10px 12px; background: #f2f2f2; border: 1px solid #c0c0c0; font-family: 'Courier New', Courier, monospace; font-size: 13px; overflow-x: auto">do i = 1 to dim(dv_vars);</pre>
+<ul style="margin: 10px 0 0 0; padding-left: 28px">
+<li><b>i</b> is a loop counter that tracks which element of the array is being processed.</li>
+<li><b>dim(dv_vars)</b> returns the number of elements in the array (7 in this case).</li>
+<li>The loop starts at 1 and runs through the last element.</li>
+</ul>
+<h3 style="margin: 16px 0 6px 0; font-size: 15px">4. Checking the Condition</h3>
+<p style="margin: 0">Inside the loop, the code checks whether each element equals 4. If it does, the counter goes up by 1. If the counter ends at 3, three of the seven variables had a value of 4.</p>
+<pre style="margin: 10px 0 0 0; padding: 10px 12px; background: #f2f2f2; border: 1px solid #c0c0c0; font-family: 'Courier New', Courier, monospace; font-size: 13px; overflow-x: auto">if dv_vars[i] = 4 then TOTAL_NSI_CNT + 1;</pre>
+<h3 style="margin: 16px 0 6px 0; font-size: 15px">5. Dropping the Loop Index Variable</h3>
+<p style="margin: 0">Once the loop finishes, the index variable i is no longer needed, so it is dropped from the dataset.</p>
+<pre style="margin: 10px 0 0 0; padding: 10px 12px; background: #f2f2f2; border: 1px solid #c0c0c0; font-family: 'Courier New', Courier, monospace; font-size: 13px; overflow-x: auto">drop i;</pre>
+<h2 style="margin: 28px 0 8px 0; font-size: 18px">SAS Code Full Example</h2>
+<pre style="margin: 0; padding: 10px 12px; background: #f2f2f2; border: 1px solid #c0c0c0; font-family: 'Courier New', Courier, monospace; font-size: 13px; overflow-x: auto">TOTAL_NSI_CNT = 0;
+array dv_vars[7] DL_18 DL_19 DL_20 DL_21 DL_22 DL_23 DL_24;
+do i = 1 to dim(dv_vars);
+  if dv_vars[i] = 4 then TOTAL_NSI_CNT + 1;
+end;
+drop i;</pre>
+<h2 style="margin: 28px 0 8px 0; font-size: 18px">Key Concepts Recap</h2>
+<dl style="margin: 0">
+<dt style="font-weight: bold">Initialize a Variable</dt><dd style="margin: 0 0 8px 28px">Setting a starting value before using it (TOTAL_NSI_CNT = 0).</dd>
+<dt style="font-weight: bold">Array</dt><dd style="margin: 0 0 8px 28px">A collection of variables treated as a group (dv_vars).</dd>
+<dt style="font-weight: bold">Do Loop</dt><dd style="margin: 0 0 8px 28px">Repeats a set of instructions a specified number of times.</dd>
+<dt style="font-weight: bold">i</dt><dd style="margin: 0 0 8px 28px">The loop counter; tracks the current position in the array.</dd>
+<dt style="font-weight: bold">dim()</dt><dd style="margin: 0 0 8px 28px">Returns the number of elements in the array.</dd>
+<dt style="font-weight: bold">Element</dt><dd style="margin: 0 0 8px 28px">Each individual variable inside an array.</dd>
+<dt style="font-weight: bold">Incrementing the Counter</dt><dd style="margin: 0 0 8px 28px">Adding 1 to a counter each time a condition is met.</dd>
+<dt style="font-weight: bold">Drop</dt><dd style="margin: 0 0 8px 28px">Removes unneeded variables (like i) from the final dataset.</dd>
+</dl>
+<h2 style="margin: 20px 0 8px 0; font-size: 18px">Conclusion</h2>
+<p style="margin: 0">Arrays and loops together let SAS count variables that meet a condition. The array groups the variables so the same logic applies to all of them at once, and the loop checks each one and updates the counter. This technique is useful in reporting and analysis wherever values need to be summarized across many data points.</p>
+<hr style="margin: 14px 0">
+<p style="margin: 0"><a href="../../../../">Back to home</a> | &#169; 2026 Zane Wubbena</p>
+</div>
+</div>
+</body>
+</html>
