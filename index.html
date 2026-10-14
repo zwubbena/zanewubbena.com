@@ -3,9 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Zane Wubbena, PhD</title>
 <meta name="description" content="Zane Wubbena, PhD: data scientist, researcher, and educator working at the intersection of education policy, quantitative research, and applied statistics.">
 <meta name="author" content="Zane Wubbena">
+<meta name="google-site-verification" content="YmyUPWzt9zq-xa_MWGjZx6Z5CkI7sYiM-rBVU-8wp0c">
 <link rel="canonical" href="https://zanewubbena.com/">
 <link rel="icon" type="image/png" href="favicon.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -15,6 +18,10 @@
 <meta property="og:description" content="Zane Wubbena, PhD: data scientist, researcher, and educator working at the intersection of education policy, quantitative research, and applied statistics.">
 <meta property="og:url" content="https://zanewubbena.com/">
 <meta property="og:image" content="https://zanewubbena.com/zane.jpg">
+<meta property="og:image:width" content="400">
+<meta property="og:image:height" content="400">
+<meta property="og:image:alt" content="Zane Wubbena">
+<meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary">
 <script type="application/ld+json">
 {
@@ -47,16 +54,16 @@ img{max-width:100%}
 </head>
 <body>
 <div class="page">
-<div class="header">
+<header class="header">
 <div>
 <h1 style="margin: 0 0 8px 0; font-size: 28px; line-height: 34px">Zane Wubbena, PhD</h1>
-<h2 style="margin: 1px; font-size: 18px"><span class="em" data-u="zwubbena" data-d="gmail.com" data-s="text-decoration: none">zwubbena at gmail dot com</span></h2>
+<p style="margin: 0; font-size: 18px; font-weight: bold"><span class="em" data-u="zwubbena" data-d="gmail.com" data-s="text-decoration: none">zwubbena at gmail dot com</span></p>
 </div>
 <div>email: <span class="em" data-u="zwubbena" data-d="gmail.com">zwubbena at gmail dot com</span><br>web: <a href="https://zanewubbena.com/">zanewubbena.com</a><br>project: <a href="https://pilotdecoder.com">pilotdecoder.com</a><br>cv: <a href="cv/">view full CV</a></div>
 <div><img src="zane.jpg" alt="Zane Wubbena" style="width: 72px; height: 72px; object-fit: cover"></div>
-</div>
+</header>
 <hr style="margin: 14px 0">
-<div>
+<main>
 <div class="news">
 <strong>Updated / News:</strong>
 <ul style="margin: 3px 0; max-width: 45em">
@@ -69,10 +76,10 @@ img{max-width:100%}
 <li>2024-10-24: <a href="2024/10/24/sas-array-counting-guide/">SAS Array Counting Guide</a></li>
 </ul>
 </div>
-<h2 style="margin: 0 0 6px 0; font-size: 18px">About</h2>
+<h2 id="about" style="margin: 0 0 6px 0; font-size: 18px">About</h2>
 <p style="margin: 5px 0 10px 0; max-width: 50em">Welcome! I'm Dr. Zane Wubbena, Managing Director of Forecasting in the Division of State Funding, Forecasting &amp; Fiscal Analysis at the Texas Education Agency. I'm also an aviation enthusiast and pilot.</p>
 <hr style="margin: 14px 0">
-<h2 style="margin: 0 0 6px 0; font-size: 18px">Projects</h2>
+<h2 id="projects" style="margin: 0 0 6px 0; font-size: 18px">Projects</h2>
 <p style="margin: 5px 0 10px 0; max-width: 50em"><a href="https://pilotdecoder.com">PilotDECODER</a>: an aviation weather education tool.</p>
 <hr style="margin: 14px 0">
 <h2 id="tools" style="margin: 0 0 6px 0; font-size: 18px">Tools</h2>
@@ -109,7 +116,7 @@ img{max-width:100%}
 <li style="margin-bottom: 6px">Coryell, J. E., Stewart, T., Wubbena, Z. C., Valverde-Poenie, T. C., &amp; Spencer, B. J. (2016). International service-learning. In <em>Advances in higher education and professional development</em> (pp. 420&#8211;445). IGI Global. <a href="https://doi.org/10.4018/978-1-5225-0169-5.ch017">[link]</a></li>
 </ul>
 <hr style="margin: 14px 0">
-<h2 style="margin: 0 0 6px 0; font-size: 18px">Writing</h2>
+<h2 id="writing" style="margin: 0 0 6px 0; font-size: 18px">Writing</h2>
 <ul style="margin: 3px 0; max-width: 60em">
 <li style="margin-bottom: 6px"><a href="2024/10/24/sas-array-counting-guide/">SAS Array Counting Guide</a>: how to use arrays and loops in SAS to count conditional values.</li>
 <li style="margin-bottom: 6px"><a href="https://github.com/zwubbena/cartesian-product">Cartesian Product</a>: using the Cartesian product in SAS to track how a district's determination level changes from one year to the next.</li>
@@ -123,19 +130,9 @@ img{max-width:100%}
 <li>The best way to get in touch with me is by email: <span class="em" data-u="zwubbena" data-d="gmail.com">zwubbena at gmail dot com</span>.</li>
 </ul>
 <hr style="margin: 14px 0">
-<p style="margin: 0">Last modified: 2026-10-13</p>
+<footer><p style="margin: 0">Last modified: 2026-10-14</p></footer>
+</main>
 </div>
-</div>
-<script>
-// Build email links in the browser so the address is not in the page source.
-document.querySelectorAll(".em").forEach(function (e) {
-  var addr = e.getAttribute("data-u") + "@" + e.getAttribute("data-d");
-  var a = document.createElement("a");
-  a.href = "mailto:" + addr;
-  a.textContent = addr;
-  if (e.getAttribute("data-s")) a.setAttribute("style", e.getAttribute("data-s"));
-  e.replaceWith(a);
-});
-</script>
+<script src="email.js"></script>
 </body>
 </html>

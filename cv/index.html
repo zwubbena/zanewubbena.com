@@ -3,6 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Curriculum Vitae | Zane Wubbena, PhD</title>
 <meta name="description" content="Curriculum vitae of Zane Wubbena, PhD: education, experience, publications, presentations, honors, and professional service.">
 <meta name="author" content="Zane Wubbena">
@@ -15,7 +17,66 @@
 <meta property="og:description" content="Curriculum vitae of Zane Wubbena, PhD: education, experience, publications, presentations, honors, and professional service.">
 <meta property="og:url" content="https://zanewubbena.com/cv/">
 <meta property="og:image" content="https://zanewubbena.com/zane.jpg">
+<meta property="og:image:width" content="400">
+<meta property="og:image:height" content="400">
+<meta property="og:image:alt" content="Zane Wubbena">
+<meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "ProfilePage",
+ "url": "https://zanewubbena.com/cv/",
+ "name": "Curriculum Vitae: Zane Wubbena, PhD",
+ "description": "Curriculum vitae of Zane Wubbena, PhD: education, experience, publications, presentations, honors, and professional service.",
+ "dateModified": "2026-10-14",
+ "mainEntity": {
+  "@type": "Person",
+  "name": "Zane Wubbena",
+  "honorificSuffix": "PhD",
+  "url": "https://zanewubbena.com/",
+  "jobTitle": "Managing Director of Forecasting",
+  "worksFor": {
+   "@type": "GovernmentOrganization",
+   "name": "Texas Education Agency"
+  },
+  "alumniOf": [
+   {
+    "@type": "CollegeOrUniversity",
+    "name": "Texas State University"
+   },
+   {
+    "@type": "CollegeOrUniversity",
+    "name": "University of Texas at Austin"
+   }
+  ],
+  "sameAs": [
+   "https://scholar.google.com/citations?user=qr2mU1oAAAAJ",
+   "https://github.com/zwubbena"
+  ]
+ }
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+  {
+   "@type": "ListItem",
+   "position": 1,
+   "name": "Zane Wubbena, PhD",
+   "item": "https://zanewubbena.com/"
+  },
+  {
+   "@type": "ListItem",
+   "position": 2,
+   "name": "Curriculum Vitae",
+   "item": "https://zanewubbena.com/cv/"
+  }
+ ]
+}
+</script>
 <style>
 body{margin:0;font-family:Quicksand,Ubuntu,Calibri,Tahoma,sans-serif;background:#ffffff;color:#000000}
 a{color:#0000ee}a:visited{color:#551a8b}
@@ -231,19 +292,9 @@ img{max-width:100%}
 <li style="margin-bottom: 6px">National Council of Teachers of Mathematics (NCTM), 2008&#8211;present</li>
 </ul>
 <hr style="margin: 14px 0">
-<p style="margin: 0">Last updated: 2026-10-13</p>
+<p style="margin: 0">Last updated: 2026-10-14</p>
 <p class="noprint" style="margin: 8px 0 0 0"><a href="../">Back to home</a></p>
 </div>
-<script>
-// Build email links in the browser so the address is not in the page source.
-document.querySelectorAll(".em").forEach(function (e) {
-  var addr = e.getAttribute("data-u") + "@" + e.getAttribute("data-d");
-  var a = document.createElement("a");
-  a.href = "mailto:" + addr;
-  a.textContent = addr;
-  if (e.getAttribute("data-s")) a.setAttribute("style", e.getAttribute("data-s"));
-  e.replaceWith(a);
-});
-</script>
+<script src="../email.js"></script>
 </body>
 </html>
