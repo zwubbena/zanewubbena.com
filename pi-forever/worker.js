@@ -1,5 +1,3 @@
-// ---------- Pure logic shared by the page, the background worker, and the tests ----------
-
 // Milestones run 1,000; 2,500; 5,000; 10,000; 25,000; 50,000; 100,000; and so on.
 function nextMilestone(x) {
   let base = 1000;
@@ -102,104 +100,12 @@ function workerMain() {
   setTimeout(tick, 0);
 }
 
-// Running counts, sums, and the longest run of one repeated digit.
-function createTally() {
-  const counts = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-  let n = 0, sum = 0, sumSq = 0;
-  let runDigit = -1, runLen = 0, runStart = 0;
-  let bestLen = 0, bestDigit = -1, bestStart = 0;
-  return {
-    add(s) {
-      for (let i = 0; i < s.length; i++) {
-        const d = s.charCodeAt(i) - 48;
-        n++;
-        counts[d]++;
-        sum += d;
-        sumSq += d * d;
-        if (d === runDigit) runLen++;
-        else { runDigit = d; runLen = 1; runStart = n; }
-        if (runLen > bestLen) { bestLen = runLen; bestDigit = d; bestStart = runStart; }
-      }
-    },
-    snapshot() {
-      const expected = n / 10;
-      const parts = counts.map(c => (n ? (c - expected) * (c - expected) / expected : 0));
-      let chi = 0;
-      for (const p of parts) chi += p;
-      return {
-        n, counts: counts.slice(), sum, sumSq, expected, parts, chi,
-        p: n ? chiSquareP(chi, 9) : 1,
-        bestLen, bestDigit, bestStart
-      };
-    }
-  };
-}
-
-// Natural log of the gamma function (Lanczos approximation, g = 7).
-function lnGamma(z) {
-  const c = [0.99999999999980993, 676.5203681218851, -1259.1392167224028, 771.32342877765313,
-    -176.61502916214059, 12.507343278686905, -0.13857109526572012, 9.9843695780195716e-6,
-    1.5056327351493116e-7];
-  if (z < 0.5) return Math.log(Math.PI / Math.sin(Math.PI * z)) - lnGamma(1 - z);
-  z -= 1;
-  let x = c[0];
-  for (let i = 1; i < 9; i++) x += c[i] / (z + i);
-  const t = z + 7.5;
-  return 0.5 * Math.log(2 * Math.PI) + (z + 0.5) * Math.log(t) - t + Math.log(x);
-}
-
-// Upper regularized incomplete gamma function Q(a, x): series below a + 1, continued fraction above.
-function gammaQ(a, x) {
-  if (x <= 0) return 1;
-  const lead = Math.exp(-x + a * Math.log(x) - lnGamma(a));
-  if (x < a + 1) {
-    let ap = a, del = 1 / a, s = del;
-    for (let i = 0; i < 1000; i++) {
-      ap += 1;
-      del *= x / ap;
-      s += del;
-      if (Math.abs(del) < Math.abs(s) * 1e-15) break;
-    }
-    return Math.max(0, 1 - s * lead);
-  }
-  const tiny = 1e-300;
-  let b = x + 1 - a, c = 1 / tiny, d = 1 / b, h = d;
-  for (let i = 1; i < 1000; i++) {
-    const an = -i * (i - a);
-    b += 2;
-    d = an * d + b; if (Math.abs(d) < tiny) d = tiny;
-    c = b + an / c; if (Math.abs(c) < tiny) c = tiny;
-    d = 1 / d;
-    const del = d * c;
-    h *= del;
-    if (Math.abs(del - 1) < 1e-15) break;
-  }
-  return lead * h;
-}
-
-// Probability of a chi-squared value at least x with df degrees of freedom.
-function chiSquareP(x, df) {
-  return gammaQ(df / 2, x / 2);
-}
-
-// ---------- Number formatting ----------
+// Number formatting
 const NUMBER_FORMATS = {};
 function fmt(x, decimals) {
   const f = NUMBER_FORMATS[decimals] || (NUMBER_FORMATS[decimals] =
     new Intl.NumberFormat('en-US', { minimumFractionDigits: decimals, maximumFractionDigits: decimals }));
   return f.format(x).replace('-', '−');
-}
-function parseNum(str) {
-  return Number(str.replace(/,/g, '').replace('−', '-'));
-}
-function fmtSigned(x, decimals) {
-  const s = fmt(Math.abs(x), decimals);
-  if (parseNum(s) === 0) return s;
-  return (x > 0 ? '+' : '−') + s;
-}
-// Seconds: three decimals under 10 seconds, two under 100, then one.
-function fmtSec(sec) {
-  return fmt(sec, sec < 10 ? 3 : sec < 100 ? 2 : 1);
 }
 // Whole seconds as hours:minutes:seconds.
 function fmtClock(totalSeconds) {
