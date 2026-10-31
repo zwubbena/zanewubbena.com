@@ -77,6 +77,30 @@ p { margin: 0; }
 .prose { text-align: justify; hyphens: auto; }
 .formula { text-align: center; font-size: 1.3rem; }
 
+/* Figure 1: drawn to scale, diameter 90 units, circumference 90 x pi units */
+.fig { margin: 0; display: grid; gap: 10px; justify-items: center; padding-top: 6px; }
+.fig svg { width: 100%; max-width: 460px; height: auto; }
+.fig text { font-family: var(--serif); font-size: 12.5px; fill: var(--ink); }
+.fig .t-circ { fill: var(--accent); }
+.fig .circ { fill: none; stroke: var(--accent); stroke-width: 3; }
+.fig .diam { fill: none; stroke: var(--ink); stroke-width: 3; }
+.fig .rest { fill: none; stroke: var(--ink); stroke-width: 3; stroke-dasharray: 2.5 2; }
+.fig .tick { fill: none; stroke: var(--ink); stroke-width: 1.2; }
+.fig .tick-c { fill: none; stroke: var(--accent); stroke-width: 1.2; }
+.fig .guide { fill: none; stroke: var(--muted); stroke-width: .8; stroke-dasharray: 2 3; }
+.fig .lead { fill: none; stroke: var(--accent); stroke-width: 1; }
+.fig .end { fill: var(--ink); stroke: none; }
+figcaption { text-align: center; font-size: .92rem; max-width: 52ch; text-wrap: balance; }
+.calc { display: grid; gap: 4px; }
+.calc .prose { margin-bottom: 10px; }
+.w-circ { color: var(--accent); font-weight: 600; hyphens: manual; }
+.w-diam { font-weight: 600; hyphens: manual; }
+
+/* Definitions of the two terms */
+.defs { margin: 0; padding-left: 1.3em; display: grid; gap: 10px; list-style: disc; }
+.defs li { padding-left: .2em; text-align: justify; hyphens: auto; }
+.defs li::marker { color: var(--ink); }
+
 /* Sections */
 .sections { display: grid; gap: 40px; }
 section { display: grid; gap: 16px; min-width: 0; }
@@ -112,21 +136,67 @@ h2 { margin: 0; text-align: center; font-weight: 400; font-size: 1.02rem; letter
     <div class="rule2"></div>
   </header>
 
-  <div class="definition">
-    <p class="prose">Pi, written π, is the number you get when you divide a circle’s distance around the outside (the circumference) by its straight-line distance across the middle (the diameter).</p>
-    <p class="formula">π = circumference ÷ diameter</p>
-  </div>
-
   <main class="sections">
+    <section class="definition" aria-labelledby="s0">
+    <h2 id="s0">1. What is Pi?</h2>
+    <p class="prose">Pi, written π, is the number you get when you divide a circle’s <span class="w-circ">circumference</span> by its <span class="w-diam">diameter</span>.</p>
+    <ul class="defs">
+      <li><span class="term w-circ">Circumference:</span> The distance around the outside of a circle, measured once <i>all the way around</i>. In Figure 1, it is the outline of the circle.</li>
+      <li><span class="term w-diam">Diameter:</span> The length of a straight line that crosses a circle <i>through its center</i>, from one edge to the other. In Figure 1, it is the line across the middle.</li>
+    </ul>
+    <figure class="fig">
+      <svg viewBox="0 0 340 206" role="img" aria-label="A circle 10 inches across, with its 10-inch diameter drawn across the middle and its circumference of about 31.42 inches around the outside. Below it, the circumference is unrolled into a straight line about 31.42 inches long, and the 10-inch diameter laid end to end along it reaches 10, 20, and 30 inches, with about 1.42 inches left over.">
+        <circle class="circ" cx="170" cy="62" r="45"></circle>
+        <line class="diam" x1="125" y1="62" x2="215" y2="62"></line>
+        <circle class="end" cx="125" cy="62" r="3"></circle>
+        <circle class="end" cx="215" cy="62" r="3"></circle>
+        <text x="170" y="55" text-anchor="middle">diameter</text>
+        <text x="170" y="78" text-anchor="middle">10 inches</text>
+        <line class="lead" x1="204.47" y1="33.07" x2="222" y2="23"></line>
+        <text class="t-circ" x="225" y="18">circumference</text>
+        <text class="t-circ" x="225" y="32">31.42 inches</text>
+
+        <text class="t-circ" x="28.63" y="126">circumference, unrolled</text>
+        <text class="t-circ" x="311.37" y="126" text-anchor="end">31.42 inches</text>
+        <line class="circ" x1="28.63" y1="136" x2="311.37" y2="136"></line>
+        <line class="tick-c" x1="28.63" y1="131" x2="28.63" y2="141"></line>
+        <line class="tick-c" x1="311.37" y1="131" x2="311.37" y2="141"></line>
+        <line class="guide" x1="28.63" y1="141" x2="28.63" y2="153"></line>
+        <line class="guide" x1="118.63" y1="141" x2="118.63" y2="153"></line>
+        <line class="guide" x1="208.63" y1="141" x2="208.63" y2="153"></line>
+        <line class="guide" x1="298.63" y1="141" x2="298.63" y2="153"></line>
+        <line class="guide" x1="311.37" y1="141" x2="311.37" y2="153"></line>
+        <line class="diam" x1="28.63" y1="158" x2="298.63" y2="158"></line>
+        <line class="rest" x1="298.63" y1="158" x2="311.37" y2="158"></line>
+        <line class="tick" x1="28.63" y1="153" x2="28.63" y2="163"></line>
+        <line class="tick" x1="118.63" y1="153" x2="118.63" y2="163"></line>
+        <line class="tick" x1="208.63" y1="153" x2="208.63" y2="163"></line>
+        <line class="tick" x1="298.63" y1="153" x2="298.63" y2="163"></line>
+        <line class="tick" x1="311.37" y1="153" x2="311.37" y2="163"></line>
+        <text x="28.63" y="178" text-anchor="middle">0</text>
+        <text x="118.63" y="178" text-anchor="middle">10</text>
+        <text x="208.63" y="178" text-anchor="middle">20</text>
+        <text x="298.63" y="178" text-anchor="middle">30</text>
+        <text x="170" y="198" text-anchor="middle">the diameter, laid end to end (inches)</text>
+      </svg>
+      <figcaption><span class="term">Figure 1.</span> A circle 10 inches across, with its circumference unrolled into a straight line about 31.42 inches long. The diameter fits along that line 3 times, with about 1.42 inches, or 0.14 of a diameter, left over. Drawn to scale.</figcaption>
+    </figure>
+    <div class="calc">
+      <p class="prose">In Figure 1, the circle is 10 inches across (the <span class="w-diam">diameter</span>) and about 31.42 inches around (the <span class="w-circ">circumference</span>).</p>
+      <p class="formula">π = <span class="w-circ">circumference</span> ÷ <span class="w-diam">diameter</span></p>
+      <p class="formula">= <span class="w-circ">31.42 inches</span> ÷ <span class="w-diam">10 inches</span> = 3.142</p>
+    </div>
+    </section>
+
     <section aria-labelledby="s1">
-      <h2 id="s1">1. The Core Idea</h2>
+      <h2 id="s1">2. The Core Idea</h2>
       <p class="prose"><span class="term">The Magic Ratio:</span> No matter how tiny a coin or how huge a wheel is, its circumference divided by its diameter always gives the same number.</p>
       <p class="prose"><span class="term">The Short Value:</span> In everyday math, people usually shorten pi to 3.14, or to the fraction 22/7.</p>
-      <p class="prose"><span class="term">The 3-Diameter Rule:</span> If you take the diameter and wrap it around the edge of the circle, it fits 3 times, with a tiny slice of about 0.14 of a diameter left over.</p>
+      <p class="prose"><span class="term">The 3-Diameter Rule:</span> If you take the diameter and wrap it around the edge of the circle, it fits 3 times, with a tiny slice of about 0.14 of a diameter left over (Figure 1).</p>
     </section>
 
     <section aria-labelledby="s2">
-      <h2 id="s2">2. Key Properties</h2>
+      <h2 id="s2">3. Key Properties</h2>
       <p class="prose"><span class="term">It Goes on Forever:</span> Pi is an irrational number, meaning its decimal digits never stop and never fall into a repeating pattern. The window below calculates the digits one at a time, without stopping.</p>
       <div class="live">
         <div class="counts">
