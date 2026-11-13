@@ -147,6 +147,7 @@ input:focus-visible, button:focus-visible { outline: 2px solid var(--ink); outli
 .mixups li { margin-bottom: 8px; }
 .mixups li:last-child { margin-bottom: 0; }
 .row select, .row input[type="date"] { width: 100%; height: 44px; margin: 0; padding: 0 8px; border: 1px solid var(--field); border-radius: 0; background: #ffffff; color: var(--ink); font: 15px var(--ui); }
+.row input[type="date"] { -webkit-appearance: none; appearance: none; } /* iPhone: keeps the Date box inside its column */
 .pair { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px; max-width: 34em; }
 .pair .input-wrap { max-width: none; }
 .small-btn { height: 44px; padding: 0 12px; border: 1px solid var(--field); border-radius: 0; background: var(--shade); color: var(--ink); font: bold 14px/1 var(--ui); cursor: pointer; }
