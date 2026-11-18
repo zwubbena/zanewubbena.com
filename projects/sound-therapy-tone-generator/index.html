@@ -1,0 +1,270 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Sound Therapy Tone Generator | Zane Wubbena, PhD</title>
+<meta name="description" content="Plays a tone at a frequency and length you choose, downloads it as a WAV file, shows the sound in slow motion, and works out its wavelength step by step.">
+<meta name="author" content="Zane Wubbena">
+<link rel="canonical" href="https://zanewubbena.com/projects/sound-therapy-tone-generator/">
+<link rel="icon" type="image/png" href="../../favicon.png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Zane Wubbena, PhD">
+<meta property="og:title" content="Sound Therapy Tone Generator">
+<meta property="og:description" content="Plays a tone at a frequency and length you choose, downloads it as a WAV file, shows the sound in slow motion, and works out its wavelength step by step.">
+<meta property="og:url" content="https://zanewubbena.com/projects/sound-therapy-tone-generator/">
+<meta property="og:image" content="https://zanewubbena.com/zane.jpg">
+<meta property="og:image:width" content="400">
+<meta property="og:image:height" content="400">
+<meta property="og:image:alt" content="Zane Wubbena">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "WebApplication",
+ "name": "Sound Therapy Tone Generator",
+ "url": "https://zanewubbena.com/projects/sound-therapy-tone-generator/",
+ "description": "Plays a tone at a frequency and length you choose, downloads it as a WAV file, shows the sound in slow motion, and works out its wavelength step by step.",
+ "applicationCategory": "MultimediaApplication",
+ "operatingSystem": "Any",
+ "browserRequirements": "Requires JavaScript",
+ "isAccessibleForFree": true,
+ "offers": {
+  "@type": "Offer",
+  "price": "0",
+  "priceCurrency": "USD"
+ },
+ "author": {
+  "@type": "Person",
+  "name": "Zane Wubbena",
+  "url": "https://zanewubbena.com/"
+ },
+ "dateModified": "2026-11-18"
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+  {
+   "@type": "ListItem",
+   "position": 1,
+   "name": "Zane Wubbena, PhD",
+   "item": "https://zanewubbena.com/"
+  },
+  {
+   "@type": "ListItem",
+   "position": 2,
+   "name": "Personal Projects",
+   "item": "https://zanewubbena.com/#projects"
+  },
+  {
+   "@type": "ListItem",
+   "position": 3,
+   "name": "Sound Therapy Tone Generator",
+   "item": "https://zanewubbena.com/projects/sound-therapy-tone-generator/"
+  }
+ ]
+}
+</script>
+<style>
+:root {
+  --ink: #000000;
+  --muted: #555555;
+  --field: #808080;
+  --rule: #c0c0c0;
+  --shade: #f2f2f2;
+  --paper: #ffffff;
+  --accent: #8b0000;
+  --error: #b42318;
+  --ui: Quicksand, Ubuntu, Calibri, Tahoma, sans-serif;
+  color-scheme: light;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: #ffffff; color: var(--ink); font-family: var(--ui); font-size: 14px; line-height: 18px; }
+a { color: #0000ee; } a:visited { color: #551a8b; }
+main { padding: 16px 24px 60px 24px; }
+main > header, main > section { max-width: 50em; }
+hr { margin: 14px 0; }
+h1 { margin: 0; font-size: 28px; line-height: 34px; }
+h2 { margin: 0 0 6px 0; font-size: 18px; }
+h3 { margin: 14px 0 4px; font-size: 15px; }
+.lede { margin: 6px 0 0; font-style: italic; }
+.crumb { margin: 0; }
+
+/* Visualization */
+.viz-options { display: flex; flex-wrap: wrap; gap: 0 18px; }
+.viz-options label { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; cursor: pointer; }
+.viz-options input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+.viz { margin: 4px 0 0; }
+.viz canvas { display: block; width: 100%; height: 250px; border: 1px solid var(--rule); }
+.viz figcaption { margin: 6px 0 0; color: var(--muted); }
+
+/* Inputs */
+.row + .row { margin-top: 12px; }
+.row label { display: block; margin-bottom: 4px; font-weight: bold; }
+.fields { display: flex; align-items: center; gap: 8px; }
+input[type="number"] { width: 8rem; height: 44px; margin: 0; padding: 0 8px; border: 1px solid var(--field); border-radius: 0; background: #ffffff; color: var(--ink); font: 16px var(--ui); font-variant-numeric: tabular-nums; }
+input.short { width: 5.5rem; }
+input:disabled { opacity: 0.6; }
+.unit { color: var(--muted); }
+.buttons { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 14px; }
+.btn { flex: none; height: 44px; padding: 0 14px; border: 1px solid var(--field); border-radius: 0; background: var(--shade); color: var(--ink); font: bold 14px/1 var(--ui); cursor: pointer; }
+.btn:hover { border-color: var(--ink); }
+.btn:disabled, .btn:disabled:hover { border-color: var(--field); opacity: 0.45; cursor: not-allowed; }
+input:focus-visible, button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+#status { min-height: 18px; margin: 12px 0 0; font-variant-numeric: tabular-nums; }
+#status.error { color: var(--error); font-weight: bold; }
+.note { margin: 8px 0 0; font-size: 13px; color: var(--muted); }
+code { font-family: "Courier New", Courier, monospace; overflow-wrap: anywhere; }
+
+/* Formulas */
+.where { margin: 4px 0 0; color: var(--muted); }
+.formula { display: flex; flex-wrap: wrap; align-items: baseline; column-gap: 0.35em; row-gap: 6px; overflow-x: auto; padding: 4px 0; }
+.formula math { font-size: 1.25em; math-style: normal; }
+.formula-note { margin: 4px 0 0; color: var(--error); font-weight: bold; }
+.formula-note:empty { display: none; }
+.steps { margin: 6px 0 0; padding-left: 1.6em; }
+.steps li + li { margin-top: 8px; }
+.steps .formula { padding: 2px 0 0; }
+.step-label { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <p class="crumb"><a href="../../">Zane Wubbena, PhD</a> &gt; Personal Projects</p>
+  <hr>
+  <header>
+    <h1>Sound Therapy Tone Generator</h1>
+    <p class="lede">Enter a frequency and a time, then play the tone or download it.</p>
+  </header>
+  <hr>
+
+  <section aria-labelledby="viz-h">
+    <h2 id="viz-h">Visualization</h2>
+    <div class="viz-options" role="radiogroup" aria-labelledby="viz-h">
+      <label><input type="radio" name="viz" value="waveform" checked> Waveform</label>
+      <label><input type="radio" name="viz" value="ripples"> Ripples</label>
+      <label><input type="radio" name="viz" value="sand"> Sand pattern</label>
+      <label><input type="radio" name="viz" value="air"> Air molecules</label>
+      <label><input type="radio" name="viz" value="spinning"> Spinning circle</label>
+    </div>
+    <figure class="viz">
+      <canvas id="viz" role="img" aria-label="Waveform of the tone, moving in slow motion while the tone plays"></canvas>
+      <figcaption id="viz-caption">A slow-motion view of the wave itself: 5 milliseconds of it, slowed down 1,000 times. Higher frequency: More cycles across the screen.</figcaption>
+    </figure>
+  </section>
+  <hr>
+
+  <section aria-labelledby="inputs-h">
+    <h2 id="inputs-h">Inputs</h2>
+    <form id="tone-form" novalidate>
+      <div class="row">
+        <label for="freq">Frequency</label>
+        <div class="fields">
+          <input id="freq" type="number" inputmode="decimal" min="0" max="22050" step="any" value="528">
+          <span class="unit">Hz</span>
+        </div>
+      </div>
+      <div class="row">
+        <label for="minutes">Time</label>
+        <div class="fields">
+          <input id="minutes" class="short" type="number" inputmode="decimal" min="0" step="any" value="2">
+          <span class="unit">min</span>
+        </div>
+      </div>
+      <div class="buttons">
+        <button class="btn" id="play" type="submit">Play</button>
+        <button class="btn" id="download" type="button">Download</button>
+      </div>
+    </form>
+    <p id="status" role="status" aria-live="polite"></p>
+    <p class="note" id="file-line"></p>
+  </section>
+  <hr>
+
+  <section aria-labelledby="formulas-h">
+    <h2 id="formulas-h">Formulas</h2>
+    <p class="where">The steps start with the frequency of the tone and update as you change the frequency or the air temperature.</p>
+
+    <h3>Step 1. Frequency of the tone</h3>
+    <div class="formula" id="freq-values">
+      <math displaystyle="true"><mtext>Frequency</mtext><mo>=</mo></math>
+      <math displaystyle="true"><mn id="m-freq1">528</mn><mtext>&#160;Hz</mtext></math>
+    </div>
+    <p class="where" id="freq-source">The tone the Play button plays, from the Frequency field.</p>
+
+    <h3>Step 2. Speed of sound in dry air</h3>
+    <div class="row">
+      <label for="temp">Air temperature</label>
+      <div class="fields">
+        <input id="temp" class="short" type="number" step="any" value="20">
+        <span class="unit">°C</span>
+      </div>
+    </div>
+    <p id="formula-note" class="formula-note" role="status" aria-live="polite"></p>
+    <div class="formula">
+      <math displaystyle="true"><mtext>Speed of sound</mtext><mo>=</mo></math>
+      <math displaystyle="true">
+        <mn>331.3</mn><mo>×</mo>
+        <msqrt><mn>1</mn><mo>+</mo><mfrac><mtext>temperature</mtext><mn>273.15</mn></mfrac></msqrt>
+      </math>
+    </div>
+    <div id="speed-work">
+      <div class="formula">
+        <math displaystyle="true"><mn id="m-speed">343.21</mn><mtext>&#160;m/s</mtext><mo>=</mo></math>
+        <math displaystyle="true">
+          <mn>331.3</mn><mtext>&#160;m/s</mtext><mo>×</mo>
+          <msqrt><mn>1</mn><mo>+</mo><mfrac><mn id="m-temp">20</mn><mn>273.15</mn></mfrac></msqrt>
+        </math>
+      </div>
+      <ol class="steps" type="a">
+        <li>
+          <span class="step-label">Divide the temperature by 273.15</span>
+          <div class="formula"><math displaystyle="true"><mfrac><mn id="s-temp">20</mn><mn>273.15</mn></mfrac><mo>=</mo><mn id="s-q">0.07321984</mn></math></div>
+        </li>
+        <li>
+          <span class="step-label">Add 1</span>
+          <div class="formula"><math displaystyle="true"><mn>1</mn><mo id="s-op">+</mo><mn id="s-q2">0.07321984</mn><mo>=</mo><mn id="s-s">1.07321984</mn></math></div>
+        </li>
+        <li>
+          <span class="step-label">Take the square root</span>
+          <div class="formula"><math displaystyle="true"><msqrt><mn id="s-s2">1.07321984</mn></msqrt><mo>=</mo><mn id="s-r">1.03596324</mn></math></div>
+        </li>
+        <li>
+          <span class="step-label">Multiply by 331.3 meters per second</span>
+          <div class="formula">
+            <math displaystyle="true"><mn>331.3</mn><mtext>&#160;m/s</mtext><mo>×</mo><mn id="s-r2">1.03596324</mn><mo>=</mo></math>
+            <math displaystyle="true"><mn id="s-v">343.21</mn><mtext>&#160;m/s</mtext></math>
+          </div>
+        </li>
+      </ol>
+    </div>
+    <p class="where">Temperature is the air temperature in °C. 273.15 is 0 °C on the kelvin scale. 331.3 meters per second is the speed of sound at 0 °C. Steps a to c keep eight decimals, and step d keeps two.</p>
+
+    <h3>Step 3. Wavelength</h3>
+    <div class="formula">
+      <math displaystyle="true"><mtext>Wavelength</mtext><mo>=</mo></math>
+      <math displaystyle="true"><mfrac><mtext>speed of sound</mtext><mtext>frequency</mtext></mfrac></math>
+    </div>
+    <div class="formula" id="wave-values">
+      <math displaystyle="true"><mn id="m-wave">0.6500</mn><mtext>&#160;m</mtext><mo>=</mo></math>
+      <math displaystyle="true">
+        <mfrac><mrow><mn id="m-speed2">343.21</mn><mtext>&#160;m/s</mtext></mrow><mrow><mn id="m-freq">528</mn><mtext>&#160;Hz</mtext></mrow></mfrac>
+      </math>
+    </div>
+    <p class="where">The speed of sound comes from step 2, and the frequency comes from step 1. The wavelength keeps four significant digits.</p>
+  </section>
+  <hr>
+  <p style="margin: 0"><a href="../../">Back to home</a></p>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
