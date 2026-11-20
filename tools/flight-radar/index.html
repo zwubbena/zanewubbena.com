@@ -3,18 +3,19 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src https://flight-radar.zwubbena.workers.dev; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data: https://tile.openstreetmap.org; connect-src https://flight-radar.zwubbena.workers.dev; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Flight Radar | Zane Wubbena, PhD</title>
-<meta name="description" content="A live flight radar for Central Texas or your location: aircraft on a radar scope with each one's callsign, altitude, speed, and track, from community ADS-B receivers.">
+<meta name="description" content="A live flight radar map for Central Texas or your location: airplane icons on a street map, with each aircraft's callsign, type, altitude, speed, and track, from community ADS-B receivers.">
 <meta name="author" content="Zane Wubbena">
 <link rel="canonical" href="https://zanewubbena.com/tools/flight-radar/">
 <link rel="icon" type="image/png" href="../../favicon.png">
 <link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<link rel="stylesheet" href="leaflet/leaflet.css">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Zane Wubbena, PhD">
 <meta property="og:title" content="Flight Radar">
-<meta property="og:description" content="A live flight radar for Central Texas or your location: aircraft on a radar scope with each one's callsign, altitude, speed, and track, from community ADS-B receivers.">
+<meta property="og:description" content="A live flight radar map for Central Texas or your location: airplane icons on a street map, with each aircraft's callsign, type, altitude, speed, and track, from community ADS-B receivers.">
 <meta property="og:url" content="https://zanewubbena.com/tools/flight-radar/">
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary">
@@ -24,7 +25,7 @@
  "@type": "WebApplication",
  "name": "Flight Radar",
  "url": "https://zanewubbena.com/tools/flight-radar/",
- "description": "A live flight radar for Central Texas or your location: aircraft on a radar scope with each one's callsign, altitude, speed, and track, from community ADS-B receivers.",
+ "description": "A live flight radar map for Central Texas or your location: airplane icons on a street map, with each aircraft's callsign, type, altitude, speed, and track, from community ADS-B receivers.",
  "applicationCategory": "UtilitiesApplication",
  "operatingSystem": "Any",
  "browserRequirements": "Requires JavaScript",
@@ -87,6 +88,7 @@ body { margin: 0; background: #ffffff; color: var(--ink); font-family: var(--ui)
 a { color: #0000ee; } a:visited { color: #551a8b; }
 main { padding: 16px 24px 60px 24px; }
 main > header, main > section { max-width: 50em; }
+main > section.wide { max-width: 72em; }
 hr { margin: 14px 0; }
 h1 { margin: 0; font-size: 28px; line-height: 34px; }
 h2 { margin: 0 0 6px 0; font-size: 18px; }
@@ -94,29 +96,53 @@ p { margin: 6px 0 0; }
 .lede { margin: 6px 0 0; font-style: italic; }
 .crumb { margin: 0; }
 .note { margin: 6px 0 0; color: var(--muted); }
+button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
 
-/* Controls */
-.controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 18px; }
-.field label { display: block; margin-bottom: 4px; font-weight: bold; }
-select { height: 44px; margin: 0; padding: 0 8px; border: 1px solid var(--field); border-radius: 0; background: #ffffff; color: var(--ink); font: 16px var(--ui); }
-.check { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; cursor: pointer; }
-.check input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
-select:focus-visible, input:focus-visible, button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+/* Map */
+.mapwrap { position: relative; margin: 8px 0 0; border: 1px solid var(--rule); }
+#map { height: 70vh; min-height: 380px; max-height: 780px; background: #e9e6df; font-family: var(--ui); }
+.leaflet-tile-pane { filter: grayscale(0.5) brightness(1.04) contrast(0.92); }
+.leaflet-container a { color: #0000ee; }
+.mapbtns { position: absolute; top: 10px; right: 10px; z-index: 1000; display: flex; flex-direction: column; gap: 8px; }
+.iconbtn { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; padding: 0; border: 1px solid #c9c9c9; border-radius: 8px; background: #ffffff; color: #222222; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.18); cursor: pointer; }
+.iconbtn:disabled { opacity: 0.45; cursor: default; }
+.plane { background: none; border: 0; }
+.plane svg { display: block; overflow: visible; fill: #ffcc1a; stroke: #3b3b3b; stroke-width: 0.7; stroke-linejoin: round; transition: transform 0.8s ease; }
+.plane.ground svg { fill: #f1dd8a; stroke: #8d8466; }
+.plane.emergency svg { fill: #ff3b3b; }
+.plane.on svg { fill: #e5482b; stroke: #ffffff; stroke-width: 0.9; }
+.leaflet-tooltip.tag { padding: 2px 6px; font: bold 12px var(--ui); color: #111111; }
+.me { background: none; border: 0; }
+@media (prefers-reduced-motion: reduce) { .plane svg { transition: none; } }
 
-/* Radar scope */
-.scope { margin: 12px 0 0; max-width: 640px; }
-.scope canvas { display: block; width: 100%; aspect-ratio: 1 / 1; background: #020503; border: 1px solid var(--rule); cursor: pointer; touch-action: manipulation; }
-.scope figcaption { margin: 6px 0 0; color: var(--muted); }
+/* Details card */
+.card { position: absolute; z-index: 1000; left: 0; right: 0; bottom: 0; padding: 12px 16px 14px; background: #ffffff; border-radius: 16px 16px 0 0; box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.2); }
+.card-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.callsign { margin: 0; font-size: 24px; line-height: 28px; font-weight: bold; }
+.sub { margin: 2px 0 0; color: var(--muted); }
+.grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px 10px; margin: 10px 0 0; padding-top: 10px; border-top: 1px solid #e3e3e3; }
+.grid dt { font-size: 12px; color: #5f5f5f; }
+.grid dd { margin: 2px 0 0; font-size: 16px; font-weight: bold; }
+.grid dd.warn { color: var(--error); }
+.card-more { margin: 10px 0 0; }
+@media (min-width: 700px) {
+  .card { left: 10px; right: auto; bottom: 10px; width: 360px; border-radius: 12px; }
+}
+@media (max-width: 699px) {
+  .mapwrap.card-open .leaflet-bottom { bottom: var(--card-h, 0px); }
+}
+@media (max-width: 600px) {
+  .mapwrap { margin-left: -24px; margin-right: -24px; border-left: 0; border-right: 0; }
+}
+.sw { display: inline-block; width: 10px; height: 10px; margin: 0 4px 0 2px; border-radius: 2px; vertical-align: -1px; }
 #status { min-height: 18px; margin: 8px 0 0; font-variant-numeric: tabular-nums; }
 #status.error { color: var(--error); font-weight: bold; }
 
-/* Tables */
+/* List */
 table { border-collapse: collapse; margin: 6px 0 0; }
-th, td { padding: 6px 14px 6px 0; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+th, td { padding: 6px 14px 6px 0; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: middle; }
 thead th { border-bottom: 1px solid var(--ink); }
 .num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
-#sel-table th { font-weight: normal; color: var(--muted); white-space: nowrap; }
-#list td { vertical-align: middle; }
 #list tr.on td { background: var(--shade); font-weight: bold; }
 .pick { min-height: 32px; margin: 0; padding: 0; border: 0; background: none; color: #0000ee; font: inherit; text-decoration: underline; cursor: pointer; }
 .pick.hex { color: var(--muted); }
@@ -128,56 +154,42 @@ thead th { border-bottom: 1px solid var(--ink); }
   <hr>
   <header>
     <h1>Flight Radar</h1>
-    <p class="lede">Live aircraft around a center point, updated every 10 seconds.</p>
+    <p class="lede">Live aircraft on a street map, updated every 10 seconds.</p>
   </header>
   <hr>
 
-  <section aria-labelledby="radar-h">
-    <h2 id="radar-h">Radar</h2>
-    <div class="controls">
-      <div class="field">
-        <label for="center">Center</label>
-        <select id="center">
-          <option value="AUS">Austin-Bergstrom (KAUS)</option>
-          <option value="GTU">Georgetown (KGTU)</option>
-          <option value="EDC">Austin Executive (KEDC)</option>
-          <option value="HYI">San Marcos (KHYI)</option>
-          <option value="50R">Lockhart (50R)</option>
-          <option value="HERE">My location</option>
-        </select>
+  <section class="wide" aria-labelledby="map-h">
+    <h2 id="map-h">Live map</h2>
+    <div class="mapwrap" id="mapwrap">
+      <div id="map" role="region" aria-label="Map of live aircraft"></div>
+      <div class="mapbtns">
+        <button type="button" class="iconbtn" id="zoom-in" aria-label="Zoom in"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M9 3v12M3 9h12"></path></svg></button>
+        <button type="button" class="iconbtn" id="zoom-out" aria-label="Zoom out"><svg aria-hidden="true" width="18" height="18" viewBox="0 0 18 18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 9h12"></path></svg></button>
+        <button type="button" class="iconbtn" id="locate" aria-label="Center on my location"><svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><circle cx="10" cy="10" r="5"></circle><path d="M10 1.5v3M10 15.5v3M1.5 10h3M15.5 10h3"></path></svg></button>
       </div>
-      <div class="field">
-        <label for="range">Range</label>
-        <select id="range">
-          <option value="10">10 nm</option>
-          <option value="20">20 nm</option>
-          <option value="40" selected>40 nm</option>
-          <option value="80">80 nm</option>
-        </select>
+      <div class="card" id="card" role="region" aria-label="Selected aircraft" hidden>
+        <div class="card-head">
+          <div>
+            <p class="callsign" id="card-callsign"></p>
+            <p class="sub" id="card-sub"></p>
+          </div>
+          <button type="button" class="iconbtn" id="card-close" aria-label="Close details"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 3l10 10M13 3L3 13"></path></svg></button>
+        </div>
+        <p class="note" id="card-gone" hidden>No longer reporting or outside the map. These are its last details.</p>
+        <dl class="grid" id="card-grid"></dl>
+        <p class="card-more"><a id="card-link" href="https://globe.adsb.lol/" target="_blank" rel="noopener noreferrer">This aircraft on globe.adsb.lol</a></p>
       </div>
-      <label class="check"><input type="checkbox" id="labels" checked> Labels</label>
     </div>
-    <figure class="scope">
-      <canvas id="scope" role="img" aria-label="Radar scope"></canvas>
-      <figcaption>Each dot is an aircraft, with a line showing where it will be in 1 minute and fainter dots showing where it has been. Small dim dots are aircraft on the ground. A label shows the callsign, then the altitude in hundreds of feet and the ground speed in knots: 054↑ 120 is 5,400 feet, climbing, at 120 knots. Labels that would overlap are left off. Red marks an emergency squawk. Rings are every <span id="ring-step">10</span> nm. Tap an aircraft for details.</figcaption>
-    </figure>
     <p id="status">Loading live aircraft.</p>
-  </section>
-  <hr>
-
-  <section aria-labelledby="sel-h">
-    <h2 id="sel-h">Selected aircraft</h2>
-    <p id="sel-empty" class="note">Tap an aircraft on the radar or a callsign in the list.</p>
-    <p id="sel-gone" class="note" hidden>This aircraft is no longer in range or no longer reporting. The details are from its last update.</p>
-    <table id="sel-table" hidden><tbody id="sel-body"></tbody></table>
+    <p class="note">Tap an airplane for details. The selected airplane's trail shows up to the last 3 minutes, colored by altitude: <span class="sw" style="background: #f28c28"></span>under 3,000 ft, <span class="sw" style="background: #e6c619"></span>3,000 to 9,999 ft, <span class="sw" style="background: #36b37e"></span>10,000 to 17,999 ft, and <span class="sw" style="background: #3d8bfd"></span>18,000 ft and up.</p>
   </section>
   <hr>
 
   <section aria-labelledby="list-h">
-    <h2 id="list-h">Aircraft in range</h2>
+    <h2 id="list-h">Aircraft on the map</h2>
     <p id="list-note" class="note">Waiting for the first update.</p>
     <table id="list" hidden>
-      <thead><tr><th>Callsign</th><th class="num">Altitude (ft)</th><th class="num">Speed (kt)</th><th class="num">Distance (nm)</th></tr></thead>
+      <thead><tr><th>Callsign</th><th class="num">Altitude (ft)</th><th class="num">Speed (kt)</th><th class="num" id="list-ref">From KAUS (nm)</th></tr></thead>
       <tbody id="list-body"></tbody>
     </table>
   </section>
@@ -185,15 +197,17 @@ thead th { border-bottom: 1px solid var(--ink); }
 
   <section aria-labelledby="how-h">
     <h2 id="how-h">How it works</h2>
-    <p>Aircraft equipped with ADS-B Out (Automatic Dependent Surveillance-Broadcast) broadcast their GPS position, altitude, ground speed, and callsign once or twice a second. Receivers on the ground, many run by volunteers, pick up those broadcasts and share them with community networks. Every 10 seconds, this page asks FlyItalyADSB, a network that also merges in data from adsb.lol and theairtraffic.com, for the aircraft within the range of the center point. Updates pause while this page is in the background.</p>
+    <p>Aircraft equipped with ADS-B Out (Automatic Dependent Surveillance-Broadcast) broadcast their GPS position, altitude, ground speed, and callsign once or twice a second. Receivers on the ground, many run by volunteers, pick up those broadcasts and share them with community networks. Every 10 seconds, this page asks FlyItalyADSB, a network that also merges in data from adsb.lol and theairtraffic.com, for the aircraft around the center of the map. Updates pause while this page is in the background.</p>
+    <p>A selected airplane's trail comes from the positions this page has received since it opened, up to the last 3 minutes.</p>
     <p>Some aircraft are missing, such as aircraft without ADS-B Out and aircraft flying too low or too far from a receiver to be heard.</p>
     <p>Altitude is barometric altitude referenced to 29.92 inches of mercury, so it can differ from an altimeter set to the local altimeter setting. Tracks and bearings are true, not magnetic. Not for navigation.</p>
-    <p>Data: <a href="https://flyitalyadsb.com/">FlyItalyADSB</a>, licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Airport locations: <a href="https://ourairports.com/">OurAirports</a>.</p>
+    <p>Data: <a href="https://flyitalyadsb.com/">FlyItalyADSB</a>, licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Map: <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, drawn with <a href="https://leafletjs.com/">Leaflet</a>. KAUS location: <a href="https://ourairports.com/">OurAirports</a>.</p>
   </section>
   <hr>
   <p style="margin: 0"><a href="../../">Back to home</a></p>
 </main>
 
+<script src="leaflet/leaflet.js"></script>
 <script src="script.js"></script>
 </body>
 </html>
