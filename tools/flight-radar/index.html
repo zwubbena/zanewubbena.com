@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src https://opensky-network.org; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src https://flight-radar.zwubbena.workers.dev; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
 <meta name="referrer" content="strict-origin-when-cross-origin">
 <title>Flight Radar | Zane Wubbena, PhD</title>
-<meta name="description" content="A live flight radar for Central Texas or your location: aircraft on a radar scope with each one's callsign, altitude, speed, and track, from the OpenSky Network.">
+<meta name="description" content="A live flight radar for Central Texas or your location: aircraft on a radar scope with each one's callsign, altitude, speed, and track, from community ADS-B receivers.">
 <meta name="author" content="Zane Wubbena">
 <link rel="canonical" href="https://zanewubbena.com/tools/flight-radar/">
 <link rel="icon" type="image/png" href="../../favicon.png">
@@ -14,7 +14,7 @@
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="Zane Wubbena, PhD">
 <meta property="og:title" content="Flight Radar">
-<meta property="og:description" content="A live flight radar for Central Texas or your location: aircraft on a radar scope with each one's callsign, altitude, speed, and track, from the OpenSky Network.">
+<meta property="og:description" content="A live flight radar for Central Texas or your location: aircraft on a radar scope with each one's callsign, altitude, speed, and track, from community ADS-B receivers.">
 <meta property="og:url" content="https://zanewubbena.com/tools/flight-radar/">
 <meta property="og:locale" content="en_US">
 <meta name="twitter:card" content="summary">
@@ -24,7 +24,7 @@
  "@type": "WebApplication",
  "name": "Flight Radar",
  "url": "https://zanewubbena.com/tools/flight-radar/",
- "description": "A live flight radar for Central Texas or your location: aircraft on a radar scope with each one's callsign, altitude, speed, and track, from the OpenSky Network.",
+ "description": "A live flight radar for Central Texas or your location: aircraft on a radar scope with each one's callsign, altitude, speed, and track, from community ADS-B receivers.",
  "applicationCategory": "UtilitiesApplication",
  "operatingSystem": "Any",
  "browserRequirements": "Requires JavaScript",
@@ -161,7 +161,7 @@ thead th { border-bottom: 1px solid var(--ink); }
       <canvas id="scope" role="img" aria-label="Radar scope"></canvas>
       <figcaption>Each dot is an aircraft, with a line showing where it will be in 1 minute and fainter dots showing where it has been. Small dim dots are aircraft on the ground. A label shows the callsign, then the altitude in hundreds of feet and the ground speed in knots: 054↑ 120 is 5,400 feet, climbing, at 120 knots. Labels that would overlap are left off. Red marks an emergency squawk. Rings are every <span id="ring-step">10</span> nm. Tap an aircraft for details.</figcaption>
     </figure>
-    <p id="status">Loading live aircraft from the OpenSky Network.</p>
+    <p id="status">Loading live aircraft.</p>
   </section>
   <hr>
 
@@ -185,11 +185,10 @@ thead th { border-bottom: 1px solid var(--ink); }
 
   <section aria-labelledby="how-h">
     <h2 id="how-h">How it works</h2>
-    <p>Aircraft equipped with ADS-B Out (Automatic Dependent Surveillance-Broadcast) broadcast their GPS position, altitude, ground speed, and callsign once or twice a second. Receivers on the ground, many run by volunteers, pick up those broadcasts and share them with the OpenSky Network. Every 10 seconds, this page asks the OpenSky Network for the aircraft in a box around the center point and draws the ones within the range you picked.</p>
+    <p>Aircraft equipped with ADS-B Out (Automatic Dependent Surveillance-Broadcast) broadcast their GPS position, altitude, ground speed, and callsign once or twice a second. Receivers on the ground, many run by volunteers, pick up those broadcasts and share them with community networks. Every 10 seconds, this page asks FlyItalyADSB, a network that also merges in data from adsb.lol and theairtraffic.com, for the aircraft within the range of the center point. Updates pause while this page is in the background.</p>
     <p>Some aircraft are missing, such as aircraft without ADS-B Out and aircraft flying too low or too far from a receiver to be heard.</p>
     <p>Altitude is barometric altitude referenced to 29.92 inches of mercury, so it can differ from an altimeter set to the local altimeter setting. Tracks and bearings are true, not magnetic. Not for navigation.</p>
-    <p>Without an account, the OpenSky Network allows 400 requests a day. At one request every 10 seconds, that is about 67 minutes of updates. Updates pause while this page is in the background.</p>
-    <p>Data: <a href="https://opensky-network.org/">The OpenSky Network</a>. Airport locations: <a href="https://ourairports.com/">OurAirports</a>.</p>
+    <p>Data: <a href="https://flyitalyadsb.com/">FlyItalyADSB</a>, licensed <a href="https://creativecommons.org/licenses/by-sa/4.0/">CC BY-SA 4.0</a>. Airport locations: <a href="https://ourairports.com/">OurAirports</a>.</p>
   </section>
   <hr>
   <p style="margin: 0"><a href="../../">Back to home</a></p>

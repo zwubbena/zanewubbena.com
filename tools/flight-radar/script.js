@@ -1,14 +1,13 @@
 "use strict";
 (() => {
-  // OpenSky Network REST API, anonymous access: 400 credits a day, and a box under 25 square degrees costs 1 credit.
-  const API = "https://opensky-network.org/api/states/all";
+  // The relay (a Cloudflare Worker) asks FlyItalyADSB for the aircraft within a radius, in kilometers, of a point.
+  const API = "https://flight-radar.zwubbena.workers.dev/";
   const POLL_MS = 10000;
   const MAX_BACKOFF_MS = 60000;
+  const LIMIT_WAIT_MS = 60000;
   const SWEEP_MS = 10000;
   const EARTH_NM = 3440.065;
-  const M_TO_FT = 3.28084;
-  const MS_TO_KT = 1.943844;
-  const MS_TO_FPM = 196.850394;
+  const KM_PER_NM = 1.852;
   const RANGES = [10, 20, 40, 80];
 
   // Airports drawn on the scope, by FAA identifier. Locations from OurAirports.
@@ -25,17 +24,21 @@
   ].map(([id, lat, lon]) => ({ id, lat, lon }));
   const CENTER_LABEL = { AUS: "KAUS", GTU: "KGTU", EDC: "KEDC", HYI: "KHYI", "50R": "50R" };
 
-  // Aircraft categories and position sources, as the OpenSky Network defines them.
+  // ADS-B emitter categories, and the position sources the feed reports.
   const CATEGORY = {
-    2: "Light (under 15,500 lb)", 3: "Small (15,500 to 75,000 lb)", 4: "Large (75,000 to 300,000 lb)",
-    5: "High vortex large (such as a Boeing 757)", 6: "Heavy (over 300,000 lb)",
-    7: "High performance (over 5 g and 400 kt)", 8: "Rotorcraft", 9: "Glider or sailplane",
-    10: "Lighter than air", 11: "Parachutist or skydiver", 12: "Ultralight, hang glider, or paraglider",
-    14: "Unmanned aerial vehicle", 15: "Space or trans-atmospheric vehicle",
-    16: "Surface vehicle, emergency", 17: "Surface vehicle, service", 18: "Point obstacle",
-    19: "Cluster obstacle", 20: "Line obstacle"
+    A1: "Light (under 15,500 lb)", A2: "Small (15,500 to 75,000 lb)", A3: "Large (75,000 to 300,000 lb)",
+    A4: "High vortex large (such as a Boeing 757)", A5: "Heavy (over 300,000 lb)",
+    A6: "High performance (over 5 g and 400 kt)", A7: "Rotorcraft", B1: "Glider or sailplane",
+    B2: "Lighter than air", B3: "Parachutist or skydiver", B4: "Ultralight, hang glider, or paraglider",
+    B6: "Unmanned aerial vehicle", B7: "Space or trans-atmospheric vehicle",
+    C1: "Surface vehicle, emergency", C2: "Surface vehicle, service", C3: "Point obstacle",
+    C4: "Cluster obstacle", C5: "Line obstacle"
   };
-  const SOURCE = ["ADS-B", "ASTERIX", "MLAT", "FLARM"];
+  const SOURCE = {
+    adsb_icao: "ADS-B", adsb_icao_nt: "ADS-B", adsb_other: "ADS-B", adsr_icao: "ADS-R", adsr_other: "ADS-R",
+    tisb_icao: "TIS-B", tisb_trackfile: "TIS-B", tisb_other: "TIS-B", mlat: "MLAT", adsc: "ADS-C",
+    mode_s: "Mode S", other: "Other"
+  };
   const SQUAWK_NOTE = { "7500": "hijack", "7600": "radio failure", "7700": "emergency", "1200": "VFR" };
   const EMERGENCY = new Set(["7500", "7600", "7700"]);
 
@@ -61,8 +64,7 @@
 
   const state = {
     center: null, range: 40, aircraft: [], trails: new Map(), selected: null, selectedLast: null,
-    time: null, remaining: null, notice: "", timer: 0, request: null, lastFetch: 0,
-    backoff: POLL_MS, stopped: false
+    time: null, notice: "", timer: 0, request: null, lastFetch: 0, backoff: POLL_MS
   };
   const view = { w: 0, dpr: 1, cx: 0, cy: 0, r: 0, scale: 1, boxes: [] };
   let animating = false;
@@ -108,12 +110,6 @@
     const v = Math.round(vr / 10) * 10;
     if (Math.abs(v) < 100) return "Level";
     return `${v > 0 ? "+" : "−"}${fmtInt(Math.abs(v))} ft/min (${v > 0 ? "climbing" : "descending"})`;
-  }
-  function waitText(sec) {
-    if (sec >= 5400) return `${Math.round(sec / 3600)} hours`;
-    if (sec >= 3600) return "1 hour";
-    const m = Math.max(1, Math.round(sec / 60));
-    return `${m} ${m === 1 ? "minute" : "minutes"}`;
   }
   function setStatus(text, isError) {
     ui.status.textContent = text;
@@ -304,8 +300,7 @@
 
   function renderStatus() {
     const n = state.aircraft.length;
-    let t = `${state.notice}${n} aircraft, updated ${zulu(state.time)} (${local(state.time)} local).`;
-    if (state.remaining != null && !Number.isNaN(state.remaining)) t += ` OpenSky requests left today: ${fmtInt(state.remaining)}.`;
+    const t = `${state.notice}${n} aircraft, updated ${zulu(state.time)} (${local(state.time)} local).`;
     state.notice = "";
     setStatus(t, false);
   }
@@ -332,10 +327,12 @@
     ui.selTable.hidden = !a;
     if (!a) { ui.selBody.innerHTML = ""; return; }
     const squawk = a.squawk ? (SQUAWK_NOTE[a.squawk] ? `${a.squawk} (${SQUAWK_NOTE[a.squawk]})` : a.squawk) : "Not reported";
+    const type = a.type ? (a.desc ? `${a.type} (${a.desc})` : a.type) : "Not reported";
     const rows = [
       ["Callsign", a.callsign || "Not reported"],
+      ["Registration", a.reg || "Not reported"],
+      ["Aircraft type", type],
       ["ICAO address", a.hex.toUpperCase()],
-      ["Country", a.country ? `${a.country} (from the ICAO address)` : "Not reported"],
       ["Category", CATEGORY[a.category] || "Not reported"],
       ["Altitude", a.ground ? "On the ground" : a.alt == null ? "Not reported" : `${fmtInt(a.alt)} ft`],
       ["Vertical speed", a.vr == null ? "Not reported" : vsText(a.vr)],
@@ -351,28 +348,33 @@
   }
 
   // Data.
+  // One record per aircraft, in the aircraft.json format: feet, knots, and feet per minute.
+  const num = (v) => (typeof v === "number" && Number.isFinite(v) ? v : null);
   function ingest(data) {
-    const now = Number(data.time) || Math.floor(Date.now() / 1000);
+    let now = Number(data.now) || Date.now() / 1000;
+    if (now > 1e12) now /= 1000;
+    now = Math.floor(now);
     const { lat: clat, lon: clon } = state.center;
     const out = [];
     const seen = new Set();
-    for (const s of data.states || []) {
-      const lon = s[5];
-      const lat = s[6];
-      const tpos = s[3];
-      if (lat == null || lon == null || tpos == null || now - tpos > 60) continue;
+    for (const s of data.ac || data.aircraft || []) {
+      const lat = num(s.lat);
+      const lon = num(s.lon);
+      const age = num(s.seen_pos) ?? 0;
+      if (lat == null || lon == null || age > 60) continue;
       const dist = distNm(clat, clon, lat, lon);
       if (dist > state.range) continue;
-      const hex = String(s[0]).toLowerCase();
+      const hex = String(s.hex || "").toLowerCase();
+      if (!hex) continue;
       out.push({
-        hex, callsign: (s[1] || "").trim(), country: s[2] || "", age: Math.max(0, now - tpos),
-        lat, lon, dist, brg: bearing(clat, clon, lat, lon),
-        alt: s[7] == null ? null : Math.round(s[7] * M_TO_FT / 25) * 25,
-        ground: s[8] === true,
-        gs: s[9] == null ? null : s[9] * MS_TO_KT,
-        track: s[10] == null ? null : s[10],
-        vr: s[11] == null ? null : s[11] * MS_TO_FPM,
-        squawk: s[14] || "", source: s[16], category: s[17]
+        hex, callsign: String(s.flight || "").trim(), reg: s.r || "", type: s.t || "", desc: s.desc || "",
+        age: Math.round(age), lat, lon, dist, brg: bearing(clat, clon, lat, lon),
+        alt: num(s.alt_baro),
+        ground: s.alt_baro === "ground",
+        gs: num(s.gs),
+        track: num(s.track) ?? num(s.true_heading),
+        vr: num(s.baro_rate) ?? num(s.geom_rate),
+        squawk: s.squawk || "", source: s.type || "", category: s.category || ""
       });
       const trail = state.trails.get(hex) || [];
       const last = trail[trail.length - 1];
@@ -391,46 +393,42 @@
     renderStatus(); renderList(); renderSelected(); render();
   }
 
-  function bbox() {
+  function query() {
     const { lat, lon } = state.center;
-    const dLat = state.range / 60;
-    const dLon = state.range / (60 * Math.cos(rad(lat)));
-    const f = (n) => n.toFixed(4);
-    return `lamin=${f(lat - dLat)}&lomin=${f(lon - dLon)}&lamax=${f(lat + dLat)}&lomax=${f(lon + dLon)}`;
+    return `lat=${lat.toFixed(4)}&lon=${lon.toFixed(4)}&km=${Math.ceil(state.range * KM_PER_NM)}`;
   }
 
   function schedule(ms) { clearTimeout(state.timer); state.timer = setTimeout(poll, ms); }
 
   async function poll() {
     clearTimeout(state.timer);
-    if (document.hidden || state.stopped || !state.center) return;
+    if (document.hidden || !state.center) return;
     if (state.request) state.request.abort();
     const request = new AbortController();
     state.request = request;
     state.lastFetch = Date.now();
+    const timeout = setTimeout(() => request.abort(), 15000);
     try {
-      const res = await fetch(`${API}?${bbox()}&extended=1`, { cache: "no-store", signal: request.signal });
+      const res = await fetch(`${API}?${query()}`, { cache: "no-store", signal: request.signal });
       if (state.request !== request) return;
       if (res.status === 429) {
-        state.stopped = true;
-        const wait = Number(res.headers.get("X-Rate-Limit-Retry-After-Seconds"));
-        setStatus(`The OpenSky Network's daily limit for requests without an account is used up. Try again ${wait > 0 ? `in about ${waitText(wait)}` : "later"}.`, true);
+        setStatus(`The data feed's request limit was reached. Trying again in ${LIMIT_WAIT_MS / 1000} seconds.`, true);
+        schedule(LIMIT_WAIT_MS);
         return;
       }
-      if (!res.ok) throw new Error(`OpenSky status ${res.status}`);
+      if (!res.ok) throw new Error(`Relay status ${res.status}`);
       const data = await res.json();
       if (state.request !== request) return;
-      const left = res.headers.get("X-Rate-Limit-Remaining");
-      state.remaining = left == null || left === "" ? null : Number(left);
       state.backoff = POLL_MS;
       ingest(data);
       schedule(POLL_MS);
     } catch (err) {
-      if (err.name === "AbortError" || state.request !== request) return;
+      if (state.request !== request) return;
       setStatus(`Live data did not load. Trying again in ${Math.round(state.backoff / 1000)} seconds.`, true);
       schedule(state.backoff);
       state.backoff = Math.min(state.backoff * 2, MAX_BACKOFF_MS);
     } finally {
+      clearTimeout(timeout);
       if (state.request === request) state.request = null;
     }
   }
@@ -443,12 +441,11 @@
       .filter((a) => a.dist <= state.range)
       .sort(byListOrder);
     if (state.selectedLast) state.selectedLast = state.aircraft.find((a) => a.hex === state.selected) || state.selectedLast;
-    state.stopped = false;
     state.backoff = POLL_MS;
     ui.ringStep.textContent = fmtStep(state.range / 4);
     redraw();
     renderList(); renderSelected();
-    setStatus("Loading live aircraft from the OpenSky Network.", false);
+    setStatus("Loading live aircraft.", false);
     poll();
   }
 
@@ -527,7 +524,6 @@
       return;
     }
     startAnim();
-    if (state.stopped) return;
     const since = Date.now() - state.lastFetch;
     if (since >= POLL_MS) poll(); else schedule(POLL_MS - since);
   });
