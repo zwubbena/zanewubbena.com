@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self'; connect-src https://opensky-network.org; base-uri 'none'; form-action 'none'; upgrade-insecure-requests">
+<meta name="referrer" content="strict-origin-when-cross-origin">
+<title>Flight Radar | Zane Wubbena, PhD</title>
+<meta name="description" content="A live flight radar for Central Texas or your location: aircraft on a radar scope with each one's callsign, altitude, speed, and track, from the OpenSky Network.">
+<meta name="author" content="Zane Wubbena">
+<link rel="canonical" href="https://zanewubbena.com/tools/flight-radar/">
+<link rel="icon" type="image/png" href="../../favicon.png">
+<link rel="apple-touch-icon" href="../../apple-touch-icon.png">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="Zane Wubbena, PhD">
+<meta property="og:title" content="Flight Radar">
+<meta property="og:description" content="A live flight radar for Central Texas or your location: aircraft on a radar scope with each one's callsign, altitude, speed, and track, from the OpenSky Network.">
+<meta property="og:url" content="https://zanewubbena.com/tools/flight-radar/">
+<meta property="og:locale" content="en_US">
+<meta name="twitter:card" content="summary">
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "WebApplication",
+ "name": "Flight Radar",
+ "url": "https://zanewubbena.com/tools/flight-radar/",
+ "description": "A live flight radar for Central Texas or your location: aircraft on a radar scope with each one's callsign, altitude, speed, and track, from the OpenSky Network.",
+ "applicationCategory": "UtilitiesApplication",
+ "operatingSystem": "Any",
+ "browserRequirements": "Requires JavaScript",
+ "isAccessibleForFree": true,
+ "offers": {
+  "@type": "Offer",
+  "price": "0",
+  "priceCurrency": "USD"
+ },
+ "author": {
+  "@type": "Person",
+  "name": "Zane Wubbena",
+  "url": "https://zanewubbena.com/"
+ },
+ "dateModified": "2026-11-20"
+}
+</script>
+<script type="application/ld+json">
+{
+ "@context": "https://schema.org",
+ "@type": "BreadcrumbList",
+ "itemListElement": [
+  {
+   "@type": "ListItem",
+   "position": 1,
+   "name": "Zane Wubbena, PhD",
+   "item": "https://zanewubbena.com/"
+  },
+  {
+   "@type": "ListItem",
+   "position": 2,
+   "name": "Tools",
+   "item": "https://zanewubbena.com/#tools"
+  },
+  {
+   "@type": "ListItem",
+   "position": 3,
+   "name": "Flight Radar",
+   "item": "https://zanewubbena.com/tools/flight-radar/"
+  }
+ ]
+}
+</script>
+<style>
+:root {
+  --ink: #000000;
+  --muted: #555555;
+  --field: #808080;
+  --rule: #c0c0c0;
+  --shade: #f2f2f2;
+  --paper: #ffffff;
+  --accent: #8b0000;
+  --error: #b42318;
+  --ui: Quicksand, Ubuntu, Calibri, Tahoma, sans-serif;
+  color-scheme: light;
+}
+*, *::before, *::after { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: #ffffff; color: var(--ink); font-family: var(--ui); font-size: 14px; line-height: 18px; }
+a { color: #0000ee; } a:visited { color: #551a8b; }
+main { padding: 16px 24px 60px 24px; }
+main > header, main > section { max-width: 50em; }
+hr { margin: 14px 0; }
+h1 { margin: 0; font-size: 28px; line-height: 34px; }
+h2 { margin: 0 0 6px 0; font-size: 18px; }
+p { margin: 6px 0 0; }
+.lede { margin: 6px 0 0; font-style: italic; }
+.crumb { margin: 0; }
+.note { margin: 6px 0 0; color: var(--muted); }
+
+/* Controls */
+.controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px 18px; }
+.field label { display: block; margin-bottom: 4px; font-weight: bold; }
+select { height: 44px; margin: 0; padding: 0 8px; border: 1px solid var(--field); border-radius: 0; background: #ffffff; color: var(--ink); font: 16px var(--ui); }
+.check { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; cursor: pointer; }
+.check input { width: 18px; height: 18px; margin: 0; accent-color: var(--accent); }
+select:focus-visible, input:focus-visible, button:focus-visible { outline: 2px solid var(--ink); outline-offset: 1px; }
+
+/* Radar scope */
+.scope { margin: 12px 0 0; max-width: 640px; }
+.scope canvas { display: block; width: 100%; aspect-ratio: 1 / 1; background: #020503; border: 1px solid var(--rule); cursor: pointer; touch-action: manipulation; }
+.scope figcaption { margin: 6px 0 0; color: var(--muted); }
+#status { min-height: 18px; margin: 8px 0 0; font-variant-numeric: tabular-nums; }
+#status.error { color: var(--error); font-weight: bold; }
+
+/* Tables */
+table { border-collapse: collapse; margin: 6px 0 0; }
+th, td { padding: 6px 14px 6px 0; border-bottom: 1px solid var(--rule); text-align: left; vertical-align: top; }
+thead th { border-bottom: 1px solid var(--ink); }
+.num { text-align: right; font-variant-numeric: tabular-nums; white-space: nowrap; }
+#sel-table th { font-weight: normal; color: var(--muted); white-space: nowrap; }
+#list td { vertical-align: middle; }
+#list tr.on td { background: var(--shade); font-weight: bold; }
+.pick { min-height: 32px; margin: 0; padding: 0; border: 0; background: none; color: #0000ee; font: inherit; text-decoration: underline; cursor: pointer; }
+.pick.hex { color: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <p class="crumb"><a href="../../">Zane Wubbena, PhD</a> &gt; Tools</p>
+  <hr>
+  <header>
+    <h1>Flight Radar</h1>
+    <p class="lede">Live aircraft around a center point, updated every 10 seconds.</p>
+  </header>
+  <hr>
+
+  <section aria-labelledby="radar-h">
+    <h2 id="radar-h">Radar</h2>
+    <div class="controls">
+      <div class="field">
+        <label for="center">Center</label>
+        <select id="center">
+          <option value="AUS">Austin-Bergstrom (KAUS)</option>
+          <option value="GTU">Georgetown (KGTU)</option>
+          <option value="EDC">Austin Executive (KEDC)</option>
+          <option value="HYI">San Marcos (KHYI)</option>
+          <option value="50R">Lockhart (50R)</option>
+          <option value="HERE">My location</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="range">Range</label>
+        <select id="range">
+          <option value="10">10 nm</option>
+          <option value="20">20 nm</option>
+          <option value="40" selected>40 nm</option>
+          <option value="80">80 nm</option>
+        </select>
+      </div>
+      <label class="check"><input type="checkbox" id="labels" checked> Labels</label>
+    </div>
+    <figure class="scope">
+      <canvas id="scope" role="img" aria-label="Radar scope"></canvas>
+      <figcaption>Each dot is an aircraft, with a line showing where it will be in 1 minute and fainter dots showing where it has been. Small dim dots are aircraft on the ground. A label shows the callsign, then the altitude in hundreds of feet and the ground speed in knots: 054↑ 120 is 5,400 feet, climbing, at 120 knots. Labels that would overlap are left off. Red marks an emergency squawk. Rings are every <span id="ring-step">10</span> nm. Tap an aircraft for details.</figcaption>
+    </figure>
+    <p id="status">Loading live aircraft from the OpenSky Network.</p>
+  </section>
+  <hr>
+
+  <section aria-labelledby="sel-h">
+    <h2 id="sel-h">Selected aircraft</h2>
+    <p id="sel-empty" class="note">Tap an aircraft on the radar or a callsign in the list.</p>
+    <p id="sel-gone" class="note" hidden>This aircraft is no longer in range or no longer reporting. The details are from its last update.</p>
+    <table id="sel-table" hidden><tbody id="sel-body"></tbody></table>
+  </section>
+  <hr>
+
+  <section aria-labelledby="list-h">
+    <h2 id="list-h">Aircraft in range</h2>
+    <p id="list-note" class="note">Waiting for the first update.</p>
+    <table id="list" hidden>
+      <thead><tr><th>Callsign</th><th class="num">Altitude (ft)</th><th class="num">Speed (kt)</th><th class="num">Distance (nm)</th></tr></thead>
+      <tbody id="list-body"></tbody>
+    </table>
+  </section>
+  <hr>
+
+  <section aria-labelledby="how-h">
+    <h2 id="how-h">How it works</h2>
+    <p>Aircraft equipped with ADS-B Out (Automatic Dependent Surveillance-Broadcast) broadcast their GPS position, altitude, ground speed, and callsign once or twice a second. Receivers on the ground, many run by volunteers, pick up those broadcasts and share them with the OpenSky Network. Every 10 seconds, this page asks the OpenSky Network for the aircraft in a box around the center point and draws the ones within the range you picked.</p>
+    <p>Some aircraft are missing, such as aircraft without ADS-B Out and aircraft flying too low or too far from a receiver to be heard.</p>
+    <p>Altitude is barometric altitude referenced to 29.92 inches of mercury, so it can differ from an altimeter set to the local altimeter setting. Tracks and bearings are true, not magnetic. Not for navigation.</p>
+    <p>Without an account, the OpenSky Network allows 400 requests a day. At one request every 10 seconds, that is about 67 minutes of updates. Updates pause while this page is in the background.</p>
+    <p>Data: <a href="https://opensky-network.org/">The OpenSky Network</a>. Airport locations: <a href="https://ourairports.com/">OurAirports</a>.</p>
+  </section>
+  <hr>
+  <p style="margin: 0"><a href="../../">Back to home</a></p>
+</main>
+
+<script src="script.js"></script>
+</body>
+</html>
